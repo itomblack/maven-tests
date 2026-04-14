@@ -40,12 +40,32 @@ Ensure `tokens.css` is loaded **once** at the app root so the CSS variables
 are available globally. In React apps, also import the CSS file in the top
 level entry (e.g. `main.tsx` / `_app.tsx`).
 
+## Repo layout
+
+```
+/
+├── index.html              # home page — registry of all prototypes
+├── design-system/          # shared tokens library (do not scatter tokens)
+└── prototypes/
+    ├── design-system/      # the token preview (foundations)
+    └── <slug>/             # one folder per prototype, kebab-case slug
+        └── index.html
+```
+
 ## Starting a new prototype in this repo
 
-1. Scaffold the prototype (Vite/Next/plain HTML — whatever fits).
+1. Create a folder under `prototypes/<slug>/` and scaffold the prototype
+   there (Vite/Next/plain HTML — whatever fits).
 2. **First file edit after scaffolding**: wire up `design-system/tokens.css`
-   (and the Tailwind preset if using Tailwind).
-3. Only then build UI. Every color, font, spacing, and radius reference
+   (and the Tailwind preset if using Tailwind). From
+   `prototypes/<slug>/index.html` the relative path is
+   `../../design-system/tokens.css`.
+3. Add a breadcrumb link back to the home page in the prototype header:
+   `<a href="../../">← All prototypes</a>`.
+4. **Register the prototype** in the root `index.html` by adding an entry
+   to the `prototypes` array (title, desc, href, tag, status). Use
+   `status: "wip"` until it's ready to share; flip to `"ready"` when done.
+5. Only then build UI. Every color, font, spacing, and radius reference
    must resolve to a token.
 
 ## Source of truth
