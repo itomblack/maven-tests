@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Maven Mini Design System — Preview</title>
+    <link rel="stylesheet" href="../../design-system/tokens.css" />
+    <style>
+      /* Preview-only layout styles — NOT part of the design system.
+         Everything that represents a token still references the tokens. */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        padding: var(--space-24);
+        background: var(--color-surface-secondary);
+      }
+      main {
+        max-width: 1080px;
+        margin: 0 auto;
+        display: grid;
+        gap: var(--space-24);
+      }
+      header {
+        display: grid;
+        gap: var(--space-8);
+      }
+      .eyebrow {
+        color: var(--color-text-secondary);
+      }
+      section {
+        background: var(--color-surface-primary);
+        border: 1px solid var(--color-border-disabled);
+        border-radius: var(--radius-lg);
+        padding: var(--space-24);
+        display: grid;
+        gap: var(--space-16);
+      }
+      section > h2 {
+        margin: 0;
+        padding-bottom: var(--space-12);
+        border-bottom: 1px solid var(--color-border-disabled);
+      }
+      h3 {
+        margin: var(--space-12) 0 var(--space-4);
+        color: var(--color-text-secondary);
+      }
+
+      /* ---- Color swatches ---- */
+      .swatch-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: var(--space-12);
+      }
+      .swatch {
+        border: 1px solid var(--color-border-disabled);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        background: var(--color-surface-primary);
+      }
+      .swatch .chip {
+        height: 72px;
+        border-bottom: 1px solid var(--color-border-disabled);
+      }
+      .swatch .meta {
+        padding: var(--space-8) var(--space-12);
+        display: grid;
+        gap: 2px;
+      }
+      .swatch .name {
+        font-family: var(--font-family-primary);
+        font-size: var(--font-size-body-sm);
+        line-height: 20px;
+        color: var(--color-text-primary);
+      }
+      .swatch .hex {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: var(--font-size-legal);
+        line-height: 18px;
+        color: var(--color-text-secondary);
+      }
+
+      /* ---- Typography rows ---- */
+      .type-row {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: var(--space-16);
+        padding: var(--space-12) 0;
+        border-top: 1px solid var(--color-border-disabled);
+        align-items: baseline;
+      }
+      .type-row:first-of-type {
+        border-top: 0;
+      }
+      .type-row .label {
+        display: grid;
+        gap: 2px;
+      }
+      .type-row .label .token {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: var(--font-size-legal);
+        line-height: 18px;
+        color: var(--color-text-secondary);
+      }
+      .type-row .label .family {
+        font-family: var(--font-family-primary);
+        font-size: var(--font-size-body-sm);
+        color: var(--color-text-primary);
+      }
+
+      /* ---- Scale rows ---- */
+      .scale-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: var(--space-12);
+      }
+      .scale-item {
+        border: 1px solid var(--color-border-disabled);
+        border-radius: var(--radius-md);
+        padding: var(--space-12);
+        display: grid;
+        gap: var(--space-8);
+        align-content: start;
+      }
+      .scale-item .box {
+        background: var(--color-maven-100);
+        border: 1px dashed var(--color-maven-700);
+      }
+      .spacing-box {
+        height: 32px;
+      }
+      .radius-box {
+        height: 56px;
+        background: var(--color-maven-800);
+        border: 0;
+      }
+
+      /* ---- Link chip for quick nav ---- */
+      .toc {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-8);
+      }
+      .toc a {
+        font-family: var(--font-family-primary);
+        font-size: var(--font-size-body-sm);
+        color: var(--color-text-link-primary);
+        text-decoration: none;
+        padding: var(--space-4) var(--space-12);
+        border: 1px solid var(--color-border-brand);
+        border-radius: var(--radius-full);
+      }
+      .toc a:hover {
+        background: var(--color-maven-100);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="ds-overline eyebrow">
+          <a href="../../" style="color: inherit; text-decoration: none">← All prototypes</a>
+          &nbsp;·&nbsp; Maven Design System
+        </p>
+        <h1 class="ds-headline-emphasis-lg" style="margin: 0">
+          Typography &amp; colors preview
+        </h1>
+        <p class="ds-body-default" style="margin: 0; color: var(--color-text-secondary)">
+          Every swatch, text style, space, and radius below is rendered using the
+          tokens in <code>design-system/tokens.css</code>.
+        </p>
+        <nav class="toc">
+          <a href="#typography">Typography</a>
+          <a href="#brand">Brand colors</a>
+          <a href="#neutral">Neutrals</a>
+          <a href="#accent">Accents</a>
+          <a href="#semantic">Semantic colors</a>
+          <a href="#spacing">Spacing</a>
+          <a href="#radius">Radius</a>
+        </nav>
+      </header>
+
+      <!-- ============================== TYPOGRAPHY ======================= -->
+      <section id="typography">
+        <h2 class="ds-subheadline-sm" style="margin: 0">Typography</h2>
+
+        <h3 class="ds-overline">Emphasis — Ivar Display</h3>
+        <div class="type-row">
+          <div class="label">
+            <div class="family">headline-emphasis-lg</div>
+            <div class="token">Ivar Display · 34 / 1.2</div>
+          </div>
+          <div class="ds-headline-emphasis-lg">The quick brown fox</div>
+        </div>
+        <div class="type-row">
+          <div class="label">
+            <div class="family">headline-emphasis-sm</div>
+            <div class="token">Ivar Display · 24 / 1.1 · ls 1</div>
+          </div>
+          <div class="ds-headline-emphasis-sm">The quick brown fox</div>
+        </div>
+        <div class="type-row">
+          <div class="label">
+            <div class="family">headline-emphasis-xs</div>
+            <div class="token">Ivar Display · 22 / 1.2 · ls 1</div>
+          </div>
+          <div class="ds-headline-emphasis-xs">The quick brown fox</div>
+        </div>
+
+        <h3 class="ds-overline">Subheadline — Helvetica Neue</h3>
+        <div class="type-row">
+          <div class="label">
+            <div class="family">subheadline-sm</div>
+            <div class="token">Helvetica Neue · 22 / 26</div>
+          </div>
+          <div class="ds-subheadline-sm">The quick brown fox jumps over the lazy dog</div>
+        </div>
+        <div class="type-row">
+          <div class="label">
+            <div class="family">subheadline-xs</div>
+            <div class="token">Helvetica Neue · 18 / 22</div>
+          </div>
+          <div class="ds-subheadline-xs">The quick brown fox jumps over the lazy dog</div>
+        </div>
+        <div class="type-row">
+          <div class="label">
+            <div class="family">subheadline-xxs</div>
+            <div class="token">Helvetica Neue · 16 / 20</div>
+          </div>
+          <div class="ds-subheadline-xxs">The quick brown fox jumps over the lazy dog</div>
+        </div>
+
+        <h3 class="ds-overline">Body — Helvetica Neue</h3>
+        <div class="type-row">
+          <div class="label">
+            <div class="family">body-default</div>
+            <div class="token">Helvetica Neue · 16 / 24</div>
+          </div>
+          <div class="ds-body-default">
+            The quick brown fox jumps over the lazy dog. Body copy at default
+            size for most paragraphs in the product.
+          </div>
+        </div>
+        <div class="type-row">
+          <div class="label">
+            <div class="family">body-small</div>
+            <div class="token">Helvetica Neue · 14 / 20</div>
+          </div>
+          <div class="ds-body-small">
+            The quick brown fox jumps over the lazy dog. Smaller body copy for
+            secondary information, captions, helper text.
+          </div>
+        </div>
+        <div class="type-row">
+          <div class="label">
+            <div class="family">body-supportive</div>
+            <div class="token">Helvetica Neue · 12 / 18</div>
+          </div>
+          <div class="ds-body-supportive">
+            Supportive text — legal, timestamps, meta information.
+          </div>
+        </div>
+        <div class="type-row">
+          <div class="label">
+            <div class="family">overline-regular</div>
+            <div class="token">Helvetica Neue · 12 / 18 · ls 1 · UPPER</div>
+          </div>
+          <div class="ds-overline">Overline label</div>
+        </div>
+
+        <h3 class="ds-overline">Interactive</h3>
+        <div class="type-row">
+          <div class="label">
+            <div class="family">interactive-default</div>
+            <div class="token">Helvetica Neue · 16 / 24</div>
+          </div>
+          <div class="ds-interactive-default">Button / link label</div>
+        </div>
+        <div class="type-row">
+          <div class="label">
+            <div class="family">interactive-small</div>
+            <div class="token">Helvetica Neue · 14 / 20</div>
+          </div>
+          <div class="ds-interactive-small">Button / link label</div>
+        </div>
+      </section>
+
+      <!-- ============================== BRAND ============================ -->
+      <section id="brand">
+        <h2 class="ds-subheadline-sm" style="margin: 0">Brand — Maven Green</h2>
+        <div class="swatch-grid" id="brand-grid"></div>
+      </section>
+
+      <!-- ============================== NEUTRAL ========================== -->
+      <section id="neutral">
+        <h2 class="ds-subheadline-sm" style="margin: 0">Neutrals</h2>
+        <div class="swatch-grid" id="neutral-grid"></div>
+      </section>
+
+      <!-- ============================== ACCENT =========================== -->
+      <section id="accent">
+        <h2 class="ds-subheadline-sm" style="margin: 0">Accents</h2>
+        <div class="swatch-grid" id="accent-grid"></div>
+      </section>
+
+      <!-- ============================== SEMANTIC ========================= -->
+      <section id="semantic">
+        <h2 class="ds-subheadline-sm" style="margin: 0">Semantic colors</h2>
+
+        <h3 class="ds-overline">Text</h3>
+        <div class="swatch-grid" id="text-grid"></div>
+        <h3 class="ds-overline">Surface</h3>
+        <div class="swatch-grid" id="surface-grid"></div>
+        <h3 class="ds-overline">Fill</h3>
+        <div class="swatch-grid" id="fill-grid"></div>
+        <h3 class="ds-overline">Border</h3>
+        <div class="swatch-grid" id="border-grid"></div>
+        <h3 class="ds-overline">Icon</h3>
+        <div class="swatch-grid" id="icon-grid"></div>
+      </section>
+
+      <!-- ============================== SPACING ========================== -->
+      <section id="spacing">
+        <h2 class="ds-subheadline-sm" style="margin: 0">Spacing</h2>
+        <div class="scale-grid" id="spacing-grid"></div>
+      </section>
+
+      <!-- ============================== RADIUS =========================== -->
+      <section id="radius">
+        <h2 class="ds-subheadline-sm" style="margin: 0">Radius</h2>
+        <div class="scale-grid" id="radius-grid"></div>
+      </section>
+    </main>
+
+    <script>
+      // Build all swatches / scale items from the token map so this file
+      // never hardcodes a hex — it just reads the CSS variables.
+      const cs = getComputedStyle(document.documentElement);
+      const v = (name) => cs.getPropertyValue(name).trim();
+
+      function swatch(container, label, varName) {
+        const hex = v(varName);
+        const el = document.createElement("div");
+        el.className = "swatch";
+        el.innerHTML = `
+          <div class="chip" style="background: var(${varName})"></div>
+          <div class="meta">
+            <div class="name">${label}</div>
+            <div class="hex">${varName} · ${hex || "—"}</div>
+          </div>
+        `;
+        container.appendChild(el);
+      }
+
+      const brand = [
+        "maven-25","maven-100","maven-300","maven-400","maven-500",
+        "maven-600","maven-700","maven-800","maven-900",
+      ];
+      const neutral = [
+        "neutral-10","neutral-20","neutral-30","neutral-40","neutral-50","neutral-60",
+        "gray-300","gray-500","coconut-100",
+      ];
+      const accent = ["mint-200","lychee-200","blueberry-500"];
+      const text = [
+        "primary","primary-inverse","secondary","active-secondary","disabled",
+        "attention","link-primary","button-secondary",
+      ];
+      const surface = [
+        "primary","secondary","overlay","overlay-light","warning","attention-primary",
+      ];
+      const fill = [
+        "button-primary","button-primary-inverse","button-secondary-inverse",
+        "button-destructive","button-disabled","button-subtle",
+        "error-primary","error-secondary",
+        "success-primary","success-secondary",
+        "warning-secondary","attention-secondary",
+      ];
+      const border = [
+        "primary","primary-inverse","brand","disabled",
+        "error","success","warning","attention-primary",
+      ];
+      const icon = [
+        "primary","primary-inverse","maven","disabled",
+        "success","warning","error","attention",
+      ];
+
+      brand.forEach((n) =>
+        swatch(document.getElementById("brand-grid"), `color-${n}`, `--color-${n}`)
+      );
+      neutral.forEach((n) =>
+        swatch(document.getElementById("neutral-grid"), `color-${n}`, `--color-${n}`)
+      );
+      accent.forEach((n) =>
+        swatch(document.getElementById("accent-grid"), `color-${n}`, `--color-${n}`)
+      );
+      text.forEach((n) =>
+        swatch(document.getElementById("text-grid"), `color-text-${n}`, `--color-text-${n}`)
+      );
+      surface.forEach((n) =>
+        swatch(
+          document.getElementById("surface-grid"),
+          `color-surface-${n}`,
+          `--color-surface-${n}`
+        )
+      );
+      fill.forEach((n) =>
+        swatch(document.getElementById("fill-grid"), `color-fill-${n}`, `--color-fill-${n}`)
+      );
+      border.forEach((n) =>
+        swatch(
+          document.getElementById("border-grid"),
+          `color-border-${n}`,
+          `--color-border-${n}`
+        )
+      );
+      icon.forEach((n) =>
+        swatch(document.getElementById("icon-grid"), `color-icon-${n}`, `--color-icon-${n}`)
+      );
+
+      // Spacing
+      const spacingScale = ["0", "2", "4", "8", "12", "16", "20", "24"];
+      const sg = document.getElementById("spacing-grid");
+      spacingScale.forEach((s) => {
+        const el = document.createElement("div");
+        el.className = "scale-item";
+        el.innerHTML = `
+          <div class="ds-body-small" style="color: var(--color-text-primary)">space-${s}</div>
+          <div class="ds-body-supportive" style="color: var(--color-text-secondary)">${s}px</div>
+          <div class="box spacing-box" style="width: var(--space-${s})"></div>
+        `;
+        sg.appendChild(el);
+      });
+
+      // Radius
+      const radiusScale = [
+        { name: "sm", px: "8px" },
+        { name: "md", px: "12px" },
+        { name: "lg", px: "16px" },
+        { name: "full", px: "9999px" },
+      ];
+      const rg = document.getElementById("radius-grid");
+      radiusScale.forEach((r) => {
+        const el = document.createElement("div");
+        el.className = "scale-item";
+        el.innerHTML = `
+          <div class="ds-body-small" style="color: var(--color-text-primary)">radius-${r.name}</div>
+          <div class="ds-body-supportive" style="color: var(--color-text-secondary)">${r.px}</div>
+          <div class="box radius-box" style="border-radius: var(--radius-${r.name})"></div>
+        `;
+        rg.appendChild(el);
+      });
+    </script>
+  </body>
+</html>

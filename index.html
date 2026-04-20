@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Maven Prototypes</title>
+    <link rel="stylesheet" href="./design-system/tokens.css" />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        min-height: 100vh;
+        background: var(--color-surface-secondary);
+        display: flex;
+        justify-content: center;
+        padding: var(--space-24);
+      }
+      main {
+        width: 100%;
+        max-width: 880px;
+        display: grid;
+        gap: var(--space-24);
+        align-content: start;
+      }
+      header {
+        display: grid;
+        gap: var(--space-8);
+        padding-top: var(--space-24);
+      }
+      .eyebrow {
+        color: var(--color-text-secondary);
+      }
+      .tagline {
+        color: var(--color-text-secondary);
+        margin: 0;
+        max-width: 56ch;
+      }
+
+      section {
+        display: grid;
+        gap: var(--space-12);
+      }
+      .section-heading {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: var(--space-16);
+      }
+      .section-heading h2 {
+        margin: 0;
+      }
+      .section-heading .count {
+        color: var(--color-text-secondary);
+      }
+
+      .list {
+        display: grid;
+        gap: var(--space-12);
+      }
+      .card {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: var(--space-16);
+        align-items: center;
+        padding: var(--space-20);
+        background: var(--color-surface-primary);
+        border: 1px solid var(--color-border-disabled);
+        border-radius: var(--radius-lg);
+        text-decoration: none;
+        color: inherit;
+        transition: border-color 120ms ease, transform 120ms ease;
+      }
+      .card:hover {
+        border-color: var(--color-border-brand);
+        transform: translateY(-1px);
+      }
+      .card[aria-disabled="true"] {
+        opacity: 0.55;
+        pointer-events: none;
+      }
+      .card .body {
+        display: grid;
+        gap: var(--space-4);
+      }
+      .card .title {
+        color: var(--color-text-primary);
+        margin: 0;
+      }
+      .card .desc {
+        color: var(--color-text-secondary);
+        margin: 0;
+      }
+      .card .meta {
+        display: flex;
+        gap: var(--space-8);
+        align-items: center;
+        margin-top: var(--space-4);
+      }
+      .chip {
+        display: inline-block;
+        padding: 2px var(--space-8);
+        border-radius: var(--radius-full);
+        font-family: var(--font-family-primary);
+        font-size: var(--font-size-legal);
+        line-height: 18px;
+        letter-spacing: var(--font-tracking-overline);
+        text-transform: uppercase;
+      }
+      .chip.brand {
+        background: var(--color-maven-100);
+        color: var(--color-maven-800);
+      }
+      .chip.muted {
+        background: var(--color-coconut-100);
+        color: var(--color-text-secondary);
+      }
+      .arrow {
+        font-family: var(--font-family-primary);
+        font-size: 24px;
+        color: var(--color-text-secondary);
+      }
+
+      .empty {
+        padding: var(--space-20);
+        background: var(--color-surface-primary);
+        border: 1px dashed var(--color-border-disabled);
+        border-radius: var(--radius-lg);
+        color: var(--color-text-secondary);
+      }
+
+      footer {
+        color: var(--color-text-secondary);
+        padding: var(--space-16) 0 var(--space-24);
+      }
+      footer a {
+        color: var(--color-text-link-primary);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="ds-overline eyebrow">Maven</p>
+        <h1 class="ds-headline-emphasis-lg" style="margin: 0">Prototypes</h1>
+        <p class="ds-body-default tagline">
+          A running index of design prototypes in this repo. Everything is built
+          on the shared Maven design system — colors, typography, spacing, and
+          radii all come from the tokens at
+          <code>design-system/</code>.
+        </p>
+      </header>
+
+      <!-- ========== Foundations ========== -->
+      <section>
+        <div class="section-heading">
+          <h2 class="ds-subheadline-sm">Foundations</h2>
+          <span class="ds-body-small count" id="foundations-count"></span>
+        </div>
+        <div class="list" id="foundations"></div>
+      </section>
+
+      <!-- ========== Prototypes ========== -->
+      <section>
+        <div class="section-heading">
+          <h2 class="ds-subheadline-sm">Prototypes</h2>
+          <span class="ds-body-small count" id="prototypes-count"></span>
+        </div>
+        <div class="list" id="prototypes"></div>
+      </section>
+
+      <footer class="ds-body-supportive">
+        Source of truth:
+        <a
+          href="https://www.figma.com/design/cTVSorq0dtdnCc6wS8TwOl/Ians-Maven-Design-System?node-id=10024-7949"
+          target="_blank"
+          rel="noreferrer"
+          >Ians-Maven-Design-System</a
+        >
+      </footer>
+    </main>
+
+    <script>
+      /**
+       * Registry of everything viewable from this home page.
+       * Add a new entry here whenever you build a new prototype.
+       *
+       *   {
+       *     title:   "What it's called",
+       *     desc:    "One-line description",
+       *     href:    "./prototypes/slug/",   // relative path to the prototype
+       *     tag:     "optional short chip",
+       *     status:  "ready" | "wip"          // wip cards are dimmed, non-clickable
+       *   }
+       */
+      const foundations = [
+        {
+          title: "Design system preview",
+          desc: "All colors, text styles, spacing, and radii from the Maven tokens, rendered live.",
+          href: "./prototypes/design-system/",
+          tag: "tokens",
+          status: "ready",
+        },
+      ];
+
+      const prototypes = [
+        {
+          title: "GLP-1 Landing Page — V1",
+          desc: "Editorial wireframe of the Maven GLP-1 Care marketing landing page.",
+          href: "./prototypes/landing-page-v1/",
+          tag: "marketing",
+          status: "ready",
+        },
+        {
+          title: "Weight Loss Calculator",
+          desc: "Interactive weight loss projection calculator.",
+          href: "./prototypes/weight-calc/",
+          tag: "tool",
+          status: "ready",
+        },
+      ];
+
+      function renderList(containerId, countId, items, emptyLabel) {
+        const container = document.getElementById(containerId);
+        const countEl = document.getElementById(countId);
+        countEl.textContent = items.length === 1 ? "1 item" : `${items.length} items`;
+
+        if (items.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "empty ds-body-default";
+          empty.textContent = emptyLabel;
+          container.appendChild(empty);
+          return;
+        }
+
+        items.forEach((item) => {
+          const card = document.createElement("a");
+          card.className = "card";
+          card.href = item.href;
+          if (item.status === "wip") card.setAttribute("aria-disabled", "true");
+
+          const chipClass = item.status === "wip" ? "muted" : "brand";
+          const chipLabel = item.status === "wip" ? "WIP" : (item.tag || "Ready");
+
+          card.innerHTML = `
+            <div class="body">
+              <h3 class="title ds-subheadline-xs">${item.title}</h3>
+              <p class="desc ds-body-small">${item.desc}</p>
+              <div class="meta">
+                <span class="chip ${chipClass}">${chipLabel}</span>
+              </div>
+            </div>
+            <div class="arrow" aria-hidden="true">→</div>
+          `;
+          container.appendChild(card);
+        });
+      }
+
+      renderList(
+        "foundations",
+        "foundations-count",
+        foundations,
+        "No foundation pages yet."
+      );
+      renderList(
+        "prototypes",
+        "prototypes-count",
+        prototypes,
+        "No prototypes yet — add one under /prototypes/ and register it in index.html."
+      );
+    </script>
+  </body>
+</html>
