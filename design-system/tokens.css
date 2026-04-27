@@ -105,11 +105,15 @@
   --font-size-subheadline-sm:  22px;
   --font-size-subheadline-lg:  24px;
   --font-size-headline-lg:     34px;
+  --font-size-headline-xlg:    40px;
+  --font-size-display-sm:      46px;
+  --font-size-display-lg:      63px;
 
   /* ---- Typography — Tracking ---- */
   --font-tracking-headline:  0;
   --font-tracking-numerical: 0;
   --font-tracking-overline:  1px;
+  --font-tracking-ivar:      0.25px;
 
   /* ---- Typography — Weight ---- */
   --font-weight-regular: 400;
@@ -235,6 +239,30 @@
   font-weight: var(--font-weight-regular);
   line-height: 1.2;
   letter-spacing: 0;
+}
+
+.ds-headline-emphasis-xlg {
+  font-family: var(--font-family-emphasis);
+  font-size: var(--font-size-headline-xlg);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.1;
+  letter-spacing: var(--font-tracking-ivar);
+}
+
+.ds-display-emphasis-sm {
+  font-family: var(--font-family-emphasis);
+  font-size: var(--font-size-display-sm);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.1;
+  letter-spacing: var(--font-tracking-ivar);
+}
+
+.ds-display-emphasis-lg {
+  font-family: var(--font-family-emphasis);
+  font-size: var(--font-size-display-lg);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.1;
+  letter-spacing: var(--font-tracking-ivar);
 }
 
 /* =============================================================================

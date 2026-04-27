@@ -117,11 +117,15 @@ module.exports = {
         "subheadline-sm":  ["22px", { lineHeight: "26px" }],
         "subheadline-lg":  ["24px", { lineHeight: "1.1", letterSpacing: "1px" }],
         "headline-lg":     ["34px", { lineHeight: "1.2" }],
+        "headline-xlg":    ["40px", { lineHeight: "1.1", letterSpacing: "0.25px" }],
+        "display-sm":      ["46px", { lineHeight: "1.1", letterSpacing: "0.25px" }],
+        "display-lg":      ["63px", { lineHeight: "1.1", letterSpacing: "0.25px" }],
       },
       letterSpacing: {
         headline:  "0",
         numerical: "0",
         overline:  "1px",
+        ivar:      "0.25px",
       },
       spacing: {
         0:  "0px",

@@ -1,0 +1,1125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Weight Chart — Maven Prototype</title>
+    <link rel="stylesheet" href="../../design-system/tokens.css" />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        background: var(--color-surface-secondary);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 48px;
+        padding: var(--space-24) var(--space-24);
+      }
+
+      /* ---- Controls panel ---- */
+      .controls-panel {
+        width: 280px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-24);
+        padding-top: var(--space-24);
+        position: sticky;
+        top: var(--space-24);
+      }
+      .controls-panel h2 {
+        color: var(--color-text-primary);
+      }
+      .control-group {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+      }
+      .control-group label {
+        color: var(--color-text-secondary);
+      }
+      .control-group .input-row {
+        display: flex;
+        gap: var(--space-8);
+        align-items: center;
+      }
+      .control-group input[type="number"],
+      .control-group select {
+        flex: 1;
+        padding: var(--space-8) var(--space-12);
+        border: 1px solid var(--color-border-primary);
+        border-radius: var(--radius-sm);
+        background: var(--color-surface-primary);
+        color: var(--color-text-primary);
+        font-family: var(--font-family-primary);
+        font-size: var(--font-size-body-default);
+        line-height: 24px;
+        outline: none;
+        transition: border-color 150ms ease;
+      }
+      .control-group input[type="number"]:focus,
+      .control-group select:focus {
+        border-color: var(--color-border-brand);
+      }
+      .control-group .suffix {
+        color: var(--color-text-secondary);
+        white-space: nowrap;
+      }
+      .controls-panel hr {
+        border: none;
+        border-top: 1px solid var(--color-border-disabled);
+        margin: 0;
+      }
+      .computed-stat {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        color: var(--color-text-secondary);
+      }
+      .computed-stat .value {
+        color: var(--color-text-primary);
+        font-weight: var(--font-weight-medium);
+      }
+      .goal-toggles {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+      }
+      .goal-toggle {
+        display: flex;
+        align-items: center;
+        padding: var(--space-8) var(--space-12);
+        border: 1px solid var(--color-border-primary);
+        border-radius: var(--radius-sm);
+        background: var(--color-surface-primary);
+        color: var(--color-text-primary);
+        cursor: pointer;
+        font-family: var(--font-family-primary);
+        font-size: var(--font-size-body-sm);
+        line-height: 20px;
+        transition: border-color 150ms ease, background 150ms ease;
+        text-align: left;
+      }
+      .goal-toggle:hover {
+        border-color: var(--color-border-brand);
+      }
+      .goal-toggle[aria-checked="true"] {
+        border-color: var(--color-border-brand);
+        background: var(--color-maven-100);
+        color: var(--color-maven-900);
+      }
+
+      .phone-frame {
+        width: 375px;
+        min-height: 812px;
+        background: var(--color-surface-primary);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--elevation-overlay);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+
+      /* ---- Masthead / Nav ---- */
+      .masthead {
+        background: var(--color-surface-primary);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .status-bar {
+        height: 47px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px var(--space-16) 0;
+      }
+      .status-bar .time {
+        font-family: -apple-system, "SF Pro Text", sans-serif;
+        font-size: 17px;
+        font-weight: 600;
+        line-height: 22px;
+        letter-spacing: -0.408px;
+        color: var(--color-text-primary);
+      }
+      .status-bar .icons {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        color: var(--color-text-primary);
+      }
+
+      .nav-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--space-16);
+        height: 56px;
+      }
+      .nav-back {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        color: var(--color-text-primary);
+        cursor: pointer;
+      }
+      .nav-back svg {
+        width: 24px;
+        height: 24px;
+      }
+      .nav-title {
+        flex: 1;
+        text-align: center;
+        color: var(--color-text-primary);
+      }
+      .nav-spacer {
+        width: 24px;
+      }
+
+      .divider {
+        height: 1px;
+        background: var(--color-border-disabled);
+      }
+
+      /* ---- Content ---- */
+      .content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Headline section */
+      .headline-block {
+        padding: var(--space-24) var(--space-20) 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-16);
+      }
+      .headline-block h1 {
+        padding-right: 48px;
+      }
+      .headline-block h1 em {
+        font-style: italic;
+      }
+
+      /* Results section */
+      .results-section {
+        padding: 0 var(--space-20);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-16);
+        align-items: center;
+      }
+
+      .weight-stat {
+        width: 100%;
+        display: flex;
+        align-items: baseline;
+        gap: var(--space-4);
+      }
+      .weight-stat .number {
+        color: var(--color-maven-900);
+      }
+      .weight-stat .unit {
+        color: var(--color-text-secondary);
+      }
+
+      /* Time period tabs */
+      .period-tabs {
+        display: flex;
+        width: 100%;
+        background: var(--color-surface-secondary);
+        border-radius: var(--radius-full);
+        gap: var(--space-8);
+      }
+      .period-tab {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px var(--space-16);
+        border-radius: var(--radius-full);
+        border: none;
+        cursor: pointer;
+        background: transparent;
+        color: var(--color-text-secondary);
+        font-family: var(--font-family-primary);
+        font-size: var(--font-size-overline);
+        line-height: 18px;
+        letter-spacing: var(--font-tracking-overline);
+        text-transform: uppercase;
+        white-space: nowrap;
+        transition: background-color 200ms ease, color 200ms ease;
+      }
+      .period-tab[aria-selected="true"] {
+        background: var(--color-maven-900);
+        color: var(--color-surface-primary);
+      }
+
+      /* Chart area */
+      .chart-container {
+        width: 100%;
+        height: 220px;
+        position: relative;
+        border-radius: var(--radius-md);
+        overflow: visible;
+      }
+
+      .chart-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-4);
+        padding: var(--space-4) var(--space-8);
+        border-radius: var(--radius-full);
+        white-space: nowrap;
+        position: absolute;
+        z-index: 2;
+        transition: left 500ms cubic-bezier(0.4, 0, 0.2, 1), top 500ms cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .chart-badge.muted {
+        background: var(--color-surface-secondary);
+        color: var(--color-text-primary);
+      }
+      .chart-badge.accent {
+        background: var(--color-mint-200);
+        color: var(--color-text-primary);
+      }
+      .chart-badge.goal {
+        background: var(--color-maven-100);
+        color: var(--color-maven-900);
+        border: 1px dashed var(--color-maven-400);
+      }
+
+      .vert-line.goal-line {
+        border-left-style: dotted;
+        border-left-color: var(--color-maven-400);
+        opacity: 0.8;
+      }
+
+      .chart-dot.goal-dot .chart-dot-outer {
+        border-color: var(--color-maven-400);
+        width: 14px;
+        height: 14px;
+      }
+      .chart-dot.goal-dot .chart-dot-inner {
+        width: 4px;
+        height: 4px;
+        background: var(--color-maven-400);
+      }
+      .chart-dot.goal-dot {
+        width: 14px;
+        height: 14px;
+      }
+
+      .chart-svg {
+        position: absolute;
+        top: 32px;
+        left: 0;
+        width: 100%;
+        height: 160px;
+      }
+
+      .chart-dot {
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        z-index: 2;
+        transition: left 500ms cubic-bezier(0.4, 0, 0.2, 1), top 500ms cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .chart-dot-outer {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 3px solid var(--color-maven-600);
+        background: var(--color-surface-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .chart-dot-inner {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--color-maven-600);
+      }
+
+      /* Vertical reference lines */
+      .vert-line {
+        position: absolute;
+        width: 1px;
+        border-left: 1px dashed var(--color-maven-300);
+        opacity: 0.6;
+        z-index: 1;
+        transition: left 500ms cubic-bezier(0.4, 0, 0.2, 1), height 500ms cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* CTA button */
+      .cta-section {
+        width: 100%;
+        padding: var(--space-24) var(--space-20) 0;
+      }
+      .cta-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: var(--space-12) var(--space-24);
+        border: none;
+        border-radius: var(--radius-full);
+        background: var(--color-maven-900);
+        color: var(--color-surface-primary);
+        cursor: pointer;
+        font-family: var(--font-family-primary);
+        font-size: var(--font-size-body-default);
+        line-height: 24px;
+        transition: opacity 150ms ease;
+      }
+      .cta-button:hover {
+        opacity: 0.9;
+      }
+
+      /* Disclaimer */
+      .disclaimer {
+        padding: 0 var(--space-20) var(--space-24);
+        color: var(--color-text-secondary);
+        font-style: italic;
+      }
+
+      /* Breadcrumb */
+      .breadcrumb {
+        position: fixed;
+        top: var(--space-8);
+        left: var(--space-8);
+        color: var(--color-text-link-primary);
+        text-decoration: none;
+        font-family: var(--font-family-primary);
+        font-size: var(--font-size-body-sm);
+      }
+      .breadcrumb:hover {
+        text-decoration: underline;
+      }
+
+      /* Right column: phone + mode toggle */
+      .phone-column {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-16);
+      }
+
+      /* Mode toggle under phone */
+      .mode-toggle {
+        display: flex;
+        background: var(--color-surface-primary);
+        border-radius: var(--radius-full);
+        border: 1px solid var(--color-border-disabled);
+        overflow: hidden;
+      }
+      .mode-btn {
+        padding: var(--space-8) var(--space-16);
+        border: none;
+        background: transparent;
+        color: var(--color-text-secondary);
+        cursor: pointer;
+        font-family: var(--font-family-primary);
+        font-size: var(--font-size-body-sm);
+        line-height: 20px;
+        white-space: nowrap;
+        transition: background 200ms ease, color 200ms ease;
+      }
+      .mode-btn[aria-pressed="true"] {
+        background: var(--color-maven-900);
+        color: var(--color-surface-primary);
+      }
+
+      /* Visibility checkboxes */
+      .visibility-toggles {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-8);
+      }
+      .vis-toggle {
+        display: flex;
+        align-items: center;
+        gap: var(--space-8);
+        cursor: pointer;
+      }
+      .vis-toggle input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--color-maven-800);
+        cursor: pointer;
+      }
+      .vis-toggle span {
+        color: var(--color-text-primary);
+      }
+    </style>
+  </head>
+  <body>
+    <a class="breadcrumb" href="../../">← All prototypes</a>
+
+    <!-- Controls panel -->
+    <div class="controls-panel">
+      <h2 class="ds-subheadline-sm">Inputs</h2>
+
+      <div class="control-group">
+        <label class="ds-overline" for="input-height-ft">Height</label>
+        <div class="input-row">
+          <input type="number" id="input-height-ft" value="5" min="4" max="7" step="1" />
+          <span class="ds-body-small suffix">ft</span>
+          <input type="number" id="input-height-in" value="4" min="0" max="11" step="1" />
+          <span class="ds-body-small suffix">in</span>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="ds-overline" for="input-weight">Current weight</label>
+        <div class="input-row">
+          <input type="number" id="input-weight" value="160" min="80" max="500" step="1" />
+          <span class="ds-body-small suffix">lbs</span>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="ds-overline">Weight loss goal</label>
+        <div class="goal-toggles" role="radiogroup">
+          <button class="goal-toggle ds-body-small" role="radio" aria-checked="false" data-goal="1-15">Lose 1–15 lbs</button>
+          <button class="goal-toggle ds-body-small" role="radio" aria-checked="true" data-goal="16-50">Lose 16–50 lbs</button>
+          <button class="goal-toggle ds-body-small" role="radio" aria-checked="false" data-goal="50+">Lose 50+ lbs</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="ds-overline">Chart markers</label>
+        <div class="visibility-toggles">
+          <label class="vis-toggle ds-body-small">
+            <input type="checkbox" id="vis-start" checked />
+            <span>Start weight</span>
+          </label>
+          <label class="vis-toggle ds-body-small">
+            <input type="checkbox" id="vis-end" checked />
+            <span>Forecasted weight</span>
+          </label>
+          <label class="vis-toggle ds-body-small">
+            <input type="checkbox" id="vis-goal" checked />
+            <span>Goal weight</span>
+          </label>
+        </div>
+      </div>
+
+      <hr />
+
+      <div style="display: flex; flex-direction: column; gap: var(--space-8);">
+        <div class="computed-stat ds-body-small">
+          <span>BMI</span>
+          <span class="value" id="stat-bmi">—</span>
+        </div>
+        <div class="computed-stat ds-body-small">
+          <span>Loss to goal</span>
+          <span class="value" id="stat-loss-to-goal">—</span>
+        </div>
+        <div class="computed-stat ds-body-small">
+          <span>Projected @ 12 mo</span>
+          <span class="value" id="stat-projected">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone-column">
+    <div class="phone-frame">
+      <!-- Status bar -->
+      <div class="masthead">
+        <div class="status-bar">
+          <span class="time">9:41</span>
+          <div class="icons">
+            <svg width="17" height="12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 3.5h1.5v5H1a1 1 0 01-1-1v-3a1 1 0 011-1zm3 -.5h1.5v6H4a1 1 0 01-1-1V4a1 1 0 011-1zm3.5-1.5H9V10.5H7.5a1 1 0 01-1-1v-6a1 1 0 011-1zM11 0h1.5v12H11a1 1 0 01-1-1V1a1 1 0 011-1z" fill="currentColor"/></svg>
+            <svg width="16" height="12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 2.4A8.5 8.5 0 00.6 5l-.6-.8A9.7 9.7 0 018 1.2 9.7 9.7 0 0116 4.2l-.6.8A8.5 8.5 0 008 2.4zm0 3a5.5 5.5 0 00-4.2 1.9l-.7-.7A6.7 6.7 0 018 4.2a6.7 6.7 0 014.9 2.4l-.7.7A5.5 5.5 0 008 5.4zM8 8.4a2.5 2.5 0 00-2 1l-.7-.7A3.7 3.7 0 018 7.2a3.7 3.7 0 012.7 1.5l-.7.7a2.5 2.5 0 00-2-1zM8 11a1 1 0 100-2 1 1 0 000 2z" fill="currentColor"/></svg>
+            <svg width="27" height="13" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="0.5" y="0.5" width="22" height="12" rx="2" stroke="currentColor" opacity=".35"/><path d="M2 4h18v5a1 1 0 01-1 1H3a1 1 0 01-1-1V4z" fill="currentColor"/><path d="M24 4.5v4a1.5 1.5 0 000-4z" fill="currentColor" opacity=".4"/></svg>
+          </div>
+        </div>
+
+        <!-- Nav bar -->
+        <div class="nav-bar">
+          <div class="nav-back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </div>
+          <span class="nav-title ds-subheadline-xxs">Clinical eligibility check</span>
+          <div class="nav-spacer"></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Content -->
+      <div class="content">
+        <div class="headline-block">
+          <h1 class="ds-headline-emphasis-xlg">Your <em>forecasted</em> weight change</h1>
+        </div>
+
+        <div style="padding: var(--space-24) var(--space-20) 0;">
+          <div class="results-section">
+            <!-- Period tabs -->
+            <div class="period-tabs" role="tablist">
+              <button class="period-tab" role="tab" aria-selected="false" data-months="3">3 Mo</button>
+              <button class="period-tab" role="tab" aria-selected="true" data-months="6">6 Mo</button>
+              <button class="period-tab" role="tab" aria-selected="false" data-months="9">9 Mo</button>
+              <button class="period-tab" role="tab" aria-selected="false" data-months="12">12 Mo</button>
+            </div>
+
+            <!-- Weight stat -->
+            <div class="weight-stat">
+              <span class="ds-display-emphasis-lg number">35</span>
+              <span class="ds-display-emphasis-sm unit">lbs</span>
+            </div>
+
+            <!-- Chart -->
+            <div class="chart-container" id="chart-container">
+              <div class="chart-badge muted ds-body-small" id="badge-start">160 lbs</div>
+              <div class="chart-badge accent ds-body-small" id="badge-end">125 lbs</div>
+
+              <div class="vert-line" id="vert-start"></div>
+              <div class="vert-line" id="vert-end"></div>
+
+              <svg class="chart-svg" id="chart-svg" viewBox="0 0 100 100" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="var(--color-maven-300)" stop-opacity="0.3" />
+                    <stop offset="100%" stop-color="var(--color-maven-100)" stop-opacity="0.08" />
+                  </linearGradient>
+                </defs>
+                <path id="chart-fill" fill="url(#chartGradient)" />
+                <path id="chart-line" stroke="var(--color-maven-300)" stroke-width="1" fill="none" vector-effect="non-scaling-stroke" />
+              </svg>
+
+              <div class="chart-dot" id="chart-dot">
+                <div class="chart-dot-outer">
+                  <div class="chart-dot-inner"></div>
+                </div>
+              </div>
+
+              <div class="chart-badge goal ds-body-small" id="badge-goal" style="display:none;">Goal</div>
+              <div class="vert-line goal-line" id="vert-goal" style="display:none;"></div>
+              <div class="chart-dot goal-dot" id="chart-dot-goal" style="display:none;">
+                <div class="chart-dot-outer">
+                  <div class="chart-dot-inner"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-section">
+          <button class="cta-button">Get started</button>
+        </div>
+
+        <!-- Disclaimer -->
+        <div style="padding: var(--space-12) var(--space-20) var(--space-24);">
+          <p class="disclaimer ds-body-small">
+            Calculations assume a woman aged 45 on Zepbound vials, based on a
+            clinical study of adults without diabetes paired with diet and exercise.
+            Individual results may vary.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="mode-toggle">
+      <button class="mode-btn" id="mode-changing" aria-pressed="true">Changing X</button>
+      <button class="mode-btn" id="mode-fixed" aria-pressed="false">Fixed X</button>
+      <button class="mode-btn" id="mode-changing-goal" aria-pressed="false">Changing X + Goal</button>
+      <button class="mode-btn" id="mode-fixed-goal" aria-pressed="false">Fixed X + Goal</button>
+    </div>
+    </div><!-- /phone-column -->
+
+    <script>
+      // Clinical data: body weight % remaining by week (week 0 = 100%)
+      const weeklyPct = [
+        100,99.63,99.25,98.88,98.50,97.92,97.35,96.77,96.19,95.62,
+        95.04,94.46,93.88,93.31,92.73,92.15,91.58,91.00,90.68,90.36,
+        90.05,89.73,89.41,89.09,88.77,88.45,88.14,87.82,87.50,87.18,
+        86.86,86.55,86.23,85.91,85.59,85.27,84.95,84.64,84.32,84.00,
+        83.73,83.46,83.19,82.92,82.65,82.38,82.12,81.85,81.58,81.31,
+        81.04,80.77,80.50
+      ];
+
+      const monthToWeek = { 3: 13, 6: 26, 9: 39, 12: 52 };
+
+      // DOM refs
+      const chartLine = document.getElementById('chart-line');
+      const chartFill = document.getElementById('chart-fill');
+      const chartDot = document.getElementById('chart-dot');
+      const badgeStart = document.getElementById('badge-start');
+      const badgeEnd = document.getElementById('badge-end');
+      const vertStart = document.getElementById('vert-start');
+      const vertEnd = document.getElementById('vert-end');
+
+      const inputHeightFt = document.getElementById('input-height-ft');
+      const inputHeightIn = document.getElementById('input-height-in');
+      const inputWeight = document.getElementById('input-weight');
+      const goalToggles = document.querySelectorAll('.goal-toggle');
+      const statBmi = document.getElementById('stat-bmi');
+      const statLossToGoal = document.getElementById('stat-loss-to-goal');
+      const statProjected = document.getElementById('stat-projected');
+
+      const badgeGoal = document.getElementById('badge-goal');
+      const vertGoal = document.getElementById('vert-goal');
+      const dotGoal = document.getElementById('chart-dot-goal');
+
+      const modeBtns = document.querySelectorAll('.mode-btn');
+
+      const visStart = document.getElementById('vis-start');
+      const visEnd = document.getElementById('vis-end');
+      const visGoalCheck = document.getElementById('vis-goal');
+
+      // State
+      let currentMonths = 6;
+      let chartMode = 'changing'; // 'changing' | 'fixed' | 'changing-goal' | 'fixed-goal'
+      let prevLossLbs = null;
+      let counterAnim = null;
+      let pathAnim = null;
+      let currentPoints = null; // current rendered SVG points for animation
+
+      // Layout constants
+      const SVG_TOP = 32;
+      const SVG_H_PX = 160;
+      const PAD_Y = 5;
+      const INSET_L = 0.10; // 10% from left for "now" line
+      const INSET_R = 0.12; // 12% from right for "end" line
+
+      // ---- Helpers ----
+
+      function animateNumber(el, from, to, duration) {
+        if (counterAnim) cancelAnimationFrame(counterAnim);
+        const start = performance.now();
+        function tick(now) {
+          const t = Math.min((now - start) / duration, 1);
+          const eased = 1 - Math.pow(1 - t, 3);
+          el.textContent = Math.round(from + (to - from) * eased);
+          if (t < 1) counterAnim = requestAnimationFrame(tick);
+        }
+        counterAnim = requestAnimationFrame(tick);
+      }
+
+      function getSelectedGoalLbs(weight) {
+        const selected = document.querySelector('.goal-toggle[aria-checked="true"]');
+        const key = selected ? selected.dataset.goal : '16-50';
+        if (key === '1-15') return Math.min(8, weight - 80);
+        if (key === '16-50') return Math.min(33, weight - 80);
+        return Math.min(60, weight - 80);
+      }
+
+      // For the goal marker: returns { goalLbs, showGoal }
+      function getGoalMarkerTarget() {
+        const selected = document.querySelector('.goal-toggle[aria-checked="true"]');
+        const key = selected ? selected.dataset.goal : '16-50';
+        if (key === '1-15') return { goalLbs: 15, showGoal: true };
+        if (key === '16-50') return { goalLbs: 50, showGoal: true };
+        return { goalLbs: 0, showGoal: false }; // 50+ → don't show
+      }
+
+      // Find the week (float) at which cumulative loss reaches goalLbs
+      function findGoalWeek(weight, goalLbs) {
+        const targetPct = ((weight - goalLbs) / weight) * 100;
+        for (let w = 1; w <= 52; w++) {
+          if (weeklyPct[w] <= targetPct) {
+            // Interpolate between w-1 and w
+            const prev = weeklyPct[w - 1];
+            const curr = weeklyPct[w];
+            const frac = (prev - targetPct) / (prev - curr);
+            return (w - 1) + frac;
+          }
+        }
+        return null; // not reached within 52 weeks
+      }
+
+      function getInputs() {
+        const ft = parseInt(inputHeightFt.value) || 5;
+        const inches = parseInt(inputHeightIn.value) || 0;
+        const heightIn = ft * 12 + inches;
+        const weight = parseFloat(inputWeight.value) || 160;
+        const goalLoss = getSelectedGoalLbs(weight);
+        const goal = weight - goalLoss;
+        return { heightIn, weight, goal };
+      }
+
+      function calcBmi(weightLbs, heightIn) {
+        return (weightLbs / (heightIn * heightIn)) * 703;
+      }
+
+      // Catmull-Rom → cubic bezier smooth path
+      function buildSmoothPath(points) {
+        if (points.length < 2) return '';
+        const n = points.length;
+        let d = `M${points[0][0]},${points[0][1]}`;
+
+        for (let i = 0; i < n - 1; i++) {
+          const p0 = points[Math.max(i - 1, 0)];
+          const p1 = points[i];
+          const p2 = points[i + 1];
+          const p3 = points[Math.min(i + 2, n - 1)];
+
+          // Catmull-Rom tangents scaled to 1/6 for cubic bezier conversion
+          const cp1x = p1[0] + (p2[0] - p0[0]) / 6;
+          const cp1y = p1[1] + (p2[1] - p0[1]) / 6;
+          const cp2x = p2[0] - (p3[0] - p1[0]) / 6;
+          const cp2y = p2[1] - (p3[1] - p1[1]) / 6;
+
+          d += ` C${cp1x},${cp1y} ${cp2x},${cp2y} ${p2[0]},${p2[1]}`;
+        }
+        return d;
+      }
+
+      // Build N evenly-spaced SVG points for a given week range
+      // NUM_PTS must be consistent across calls for interpolation
+      // Fewer points + Catmull-Rom = smoother curve
+      const NUM_PTS = 20;
+
+      function buildPoints(endWeek) {
+        const data = weeklyPct.slice(0, endWeek + 1);
+        const maxPct = data[0];
+        const minPct = data[data.length - 1];
+        const yRange = 100 - PAD_Y * 2;
+        const pts = [];
+        for (let i = 0; i < NUM_PTS; i++) {
+          const t = i / (NUM_PTS - 1); // 0→1
+          const weekFloat = t * endWeek;
+          const wLow = Math.floor(weekFloat);
+          const wHigh = Math.min(wLow + 1, endWeek);
+          const frac = weekFloat - wLow;
+          const pct = weeklyPct[wLow] + (weeklyPct[wHigh] - weeklyPct[wLow]) * frac;
+          const yNorm = maxPct === minPct ? 0 : (maxPct - pct) / (maxPct - minPct);
+          pts.push([t * 100, PAD_Y + yNorm * yRange]);
+        }
+        return pts;
+      }
+
+      // Full 52-week points (for fixed mode)
+      function buildFullPoints() {
+        const maxPct = weeklyPct[0];
+        const minPct = weeklyPct[52];
+        const yRange = 100 - PAD_Y * 2;
+        const pts = [];
+        for (let i = 0; i < NUM_PTS; i++) {
+          const t = i / (NUM_PTS - 1);
+          const weekFloat = t * 52;
+          const wLow = Math.floor(weekFloat);
+          const wHigh = Math.min(wLow + 1, 52);
+          const frac = weekFloat - wLow;
+          const pct = weeklyPct[wLow] + (weeklyPct[wHigh] - weeklyPct[wLow]) * frac;
+          const yNorm = (maxPct - pct) / (maxPct - minPct);
+          pts.push([t * 100, PAD_Y + yNorm * yRange]);
+        }
+        return pts;
+      }
+
+      function setPath(points) {
+        const d = buildSmoothPath(points);
+        chartLine.setAttribute('d', d);
+        chartFill.setAttribute('d', d + ' L100,100 L0,100Z');
+      }
+
+      function animatePath(fromPts, toPts, duration, onDone) {
+        if (pathAnim) cancelAnimationFrame(pathAnim);
+        const start = performance.now();
+        function tick(now) {
+          const t = Math.min((now - start) / duration, 1);
+          const eased = t < 1 ? 1 - Math.pow(1 - t, 3) : 1;
+          const interp = fromPts.map((fp, i) => [
+            fp[0] + (toPts[i][0] - fp[0]) * eased,
+            fp[1] + (toPts[i][1] - fp[1]) * eased,
+          ]);
+          setPath(interp);
+          if (t < 1) {
+            pathAnim = requestAnimationFrame(tick);
+          } else {
+            currentPoints = toPts;
+            if (onDone) onDone();
+          }
+        }
+        pathAnim = requestAnimationFrame(tick);
+      }
+
+      // ---- Render modes ----
+
+      // Interpolate SVG Y at a given SVG X from point array
+      function interpY(pts, svgX) {
+        for (let i = 1; i < pts.length; i++) {
+          if (pts[i][0] >= svgX) {
+            const [x0, y0] = pts[i - 1];
+            const [x1, y1] = pts[i];
+            const t = x1 === x0 ? 0 : (svgX - x0) / (x1 - x0);
+            return y0 + (y1 - y0) * t;
+          }
+        }
+        return pts[pts.length - 1][1];
+      }
+
+      // Position goal marker elements (or hide them)
+      function positionGoalMarker(goalWeek, endWeek, pts, containerW, isChangingMode) {
+        const { goalLbs, showGoal } = getGoalMarkerTarget();
+        const weight = parseFloat(inputWeight.value) || 160;
+
+        if (!showGoal || goalWeek === null || goalWeek > endWeek) {
+          badgeGoal.style.display = 'none';
+          vertGoal.style.display = 'none';
+          dotGoal.style.display = 'none';
+          return;
+        }
+
+        badgeGoal.style.display = '';
+        vertGoal.style.display = '';
+        dotGoal.style.display = '';
+        badgeGoal.textContent = `${weight - goalLbs} lbs`;
+
+        let goalPx, goalSvgY;
+
+        if (isChangingMode) {
+          // In changing mode, x maps week 0→endWeek to SVG 0→100
+          const goalSvgX = (goalWeek / endWeek) * 100;
+          // Goal pixel X: map SVG X to container, same as the curve
+          goalPx = (goalSvgX / 100) * containerW;
+          goalSvgY = interpY(pts, goalSvgX);
+        } else {
+          // In fixed mode, x maps week 0→52 to SVG 0→100
+          const goalSvgX = (goalWeek / 52) * 100;
+          goalPx = (goalSvgX / 100) * containerW;
+          goalSvgY = interpY(pts, goalSvgX);
+        }
+
+        const goalDotY = SVG_TOP + (goalSvgY / 100) * SVG_H_PX;
+
+        dotGoal.style.left = (goalPx - 7) + 'px';
+        dotGoal.style.top = (goalDotY - 7) + 'px';
+
+        badgeGoal.style.left = (goalPx - 20) + 'px';
+        badgeGoal.style.top = '0';
+
+        vertGoal.style.left = goalPx + 'px';
+        vertGoal.style.top = SVG_TOP + 'px';
+        vertGoal.style.height = SVG_H_PX + 'px';
+      }
+
+      function hideGoalMarker() {
+        badgeGoal.style.display = 'none';
+        vertGoal.style.display = 'none';
+        dotGoal.style.display = 'none';
+      }
+
+      function applyVisibility() {
+        const showStart = visStart.checked;
+        const showEnd = visEnd.checked;
+
+        badgeStart.style.visibility = showStart ? '' : 'hidden';
+        vertStart.style.visibility = showStart ? '' : 'hidden';
+
+        badgeEnd.style.visibility = showEnd ? '' : 'hidden';
+        vertEnd.style.visibility = showEnd ? '' : 'hidden';
+        chartDot.style.visibility = showEnd ? '' : 'hidden';
+
+        // Goal visibility is layered: checkbox AND mode must both allow it
+        if (!visGoalCheck.checked) {
+          badgeGoal.style.visibility = 'hidden';
+          vertGoal.style.visibility = 'hidden';
+          dotGoal.style.visibility = 'hidden';
+        } else {
+          badgeGoal.style.visibility = '';
+          vertGoal.style.visibility = '';
+          dotGoal.style.visibility = '';
+        }
+      }
+
+      function renderChanging(endWeek, animate, withGoal, goalWeek) {
+        const targetPts = buildPoints(endWeek);
+        const containerW = document.getElementById('chart-container').offsetWidth;
+
+        // Fixed marker positions
+        const nowPx = containerW * INSET_L;
+        const endPx = containerW * (1 - INSET_R);
+
+        const endSvgX = (1 - INSET_R) * 100;
+        const endSvgY = interpY(targetPts, endSvgX);
+        const dotPxY = SVG_TOP + (endSvgY / 100) * SVG_H_PX - 9;
+
+        chartDot.style.left = (endPx - 9) + 'px';
+        chartDot.style.top = dotPxY + 'px';
+
+        badgeStart.style.left = nowPx + 'px';
+        badgeStart.style.top = '0';
+        badgeEnd.style.left = (endPx - 20) + 'px';
+        badgeEnd.style.top = '0';
+        badgeEnd.style.right = 'auto';
+
+        vertStart.style.left = nowPx + 'px';
+        vertStart.style.top = SVG_TOP + 'px';
+        vertStart.style.height = SVG_H_PX + 'px';
+        vertEnd.style.left = endPx + 'px';
+        vertEnd.style.top = SVG_TOP + 'px';
+        vertEnd.style.height = SVG_H_PX + 'px';
+
+        if (withGoal) {
+          positionGoalMarker(goalWeek, endWeek, targetPts, containerW, true);
+        } else {
+          hideGoalMarker();
+        }
+
+        if (animate && currentPoints) {
+          animatePath(currentPoints, targetPts, 500);
+        } else {
+          setPath(targetPts);
+          currentPoints = targetPts;
+        }
+      }
+
+      function renderFixed(endWeek, animate, withGoal, goalWeek) {
+        const targetPts = buildFullPoints();
+        const containerW = document.getElementById('chart-container').offsetWidth;
+
+        const nowPx = containerW * INSET_L;
+        const weekFrac = endWeek / 52;
+        const endPx = Math.min(weekFrac * containerW, containerW * (1 - INSET_R));
+
+        const ptIdx = weekFrac * (NUM_PTS - 1);
+        const lo = Math.floor(ptIdx);
+        const hi = Math.min(lo + 1, NUM_PTS - 1);
+        const frac = ptIdx - lo;
+        const endSvgY = targetPts[lo][1] + (targetPts[hi][1] - targetPts[lo][1]) * frac;
+        const dotPxY = SVG_TOP + (endSvgY / 100) * SVG_H_PX - 9;
+
+        chartDot.style.left = (endPx - 9) + 'px';
+        chartDot.style.top = dotPxY + 'px';
+
+        badgeStart.style.left = nowPx + 'px';
+        badgeStart.style.top = '0';
+        badgeEnd.style.left = (endPx - 20) + 'px';
+        badgeEnd.style.top = '0';
+        badgeEnd.style.right = 'auto';
+
+        vertStart.style.left = nowPx + 'px';
+        vertStart.style.top = SVG_TOP + 'px';
+        vertStart.style.height = SVG_H_PX + 'px';
+        vertEnd.style.left = endPx + 'px';
+        vertEnd.style.top = SVG_TOP + 'px';
+        vertEnd.style.height = SVG_H_PX + 'px';
+
+        if (withGoal) {
+          positionGoalMarker(goalWeek, endWeek, targetPts, containerW, false);
+        } else {
+          hideGoalMarker();
+        }
+
+        if (animate && currentPoints) {
+          animatePath(currentPoints, targetPts, 500);
+        } else {
+          setPath(targetPts);
+          currentPoints = targetPts;
+        }
+      }
+
+      // ---- Main update ----
+
+      function update(months, animate) {
+        if (months) currentMonths = months;
+        const { heightIn, weight, goal } = getInputs();
+        const endWeek = monthToWeek[currentMonths];
+        const endPct = weeklyPct[endWeek];
+        const endWeight = Math.round(weight * endPct / 100);
+        const lossLbs = weight - endWeight;
+        const projected12 = Math.round(weight * weeklyPct[52] / 100);
+
+        // Animate the big number
+        const numEl = document.querySelector('.weight-stat .number');
+        if (animate && prevLossLbs !== null && prevLossLbs !== lossLbs) {
+          animateNumber(numEl, prevLossLbs, lossLbs, 500);
+        } else {
+          numEl.textContent = lossLbs;
+        }
+        prevLossLbs = lossLbs;
+
+        badgeStart.textContent = `${weight} lbs`;
+        badgeEnd.textContent = `${endWeight} lbs`;
+
+        // Goal marker: find the week they hit their goal
+        const { goalLbs, showGoal } = getGoalMarkerTarget();
+        const goalWeek = showGoal ? findGoalWeek(weight, goalLbs) : null;
+        const withGoal = chartMode.endsWith('-goal');
+
+        if (chartMode === 'changing' || chartMode === 'changing-goal') {
+          renderChanging(endWeek, animate, withGoal, goalWeek);
+        } else {
+          renderFixed(endWeek, animate, withGoal, goalWeek);
+        }
+
+        // Sidebar stats
+        statBmi.textContent = calcBmi(weight, heightIn).toFixed(1);
+        statLossToGoal.textContent = `${weight - goal} lbs`;
+        statProjected.textContent = `${projected12} lbs`;
+
+        applyVisibility();
+      }
+
+      // ---- Event listeners ----
+
+      // Tab switching
+      const tabs = document.querySelectorAll('.period-tab');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => t.setAttribute('aria-selected', 'false'));
+          tab.setAttribute('aria-selected', 'true');
+          update(parseInt(tab.dataset.months), true);
+        });
+      });
+
+      // Control inputs
+      [inputHeightFt, inputHeightIn, inputWeight].forEach(el => {
+        el.addEventListener('input', () => update(null, false));
+      });
+
+      // Goal toggles
+      goalToggles.forEach(btn => {
+        btn.addEventListener('click', () => {
+          goalToggles.forEach(b => b.setAttribute('aria-checked', 'false'));
+          btn.setAttribute('aria-checked', 'true');
+          update(null, false);
+        });
+      });
+
+      // Mode toggle
+      const modeMap = {
+        'mode-changing': 'changing',
+        'mode-fixed': 'fixed',
+        'mode-changing-goal': 'changing-goal',
+        'mode-fixed-goal': 'fixed-goal',
+      };
+      modeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const newMode = modeMap[btn.id];
+          if (chartMode === newMode) return;
+          chartMode = newMode;
+          modeBtns.forEach(b => b.setAttribute('aria-pressed', 'false'));
+          btn.setAttribute('aria-pressed', 'true');
+          currentPoints = null;
+          update(null, false);
+        });
+      });
+
+      // Visibility checkboxes
+      [visStart, visEnd, visGoalCheck].forEach(el => {
+        el.addEventListener('change', () => applyVisibility());
+      });
+
+      // Initial render
+      update(6, false);
+    </script>
+  </body>
+</html>
