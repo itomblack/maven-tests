@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Maven — Cross-Sell Pattern Prototypes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,300..500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #F5F2ED; --surface: #FFFFFF; --green: #0F4D3F; --green-light: #E7F0EC;
+    --green-muted: #D4E5DC; --ink: #1A1D1A; --mute: #6B7269; --mute-2: #9A9E96;
+    --line: rgba(20,22,18,0.10); --line-light: rgba(20,22,18,0.06);
+    --serif: "Fraunces", Georgia, serif; --sans: "Inter", system-ui, sans-serif;
+    --r-sm: 12px; --r-md: 16px; --r-lg: 20px; --r-full: 999px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: #E8E4DD; }
+  body { font-family: var(--sans); color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+  /* ---- Desktop shell ---- */
+  .shell { max-width: 1200px; margin: 0 auto; padding: 32px 24px 64px; }
+  .shell-head { text-align: center; margin-bottom: 32px; }
+  .shell-head h1 { font-family: var(--serif); font-size: 28px; font-weight: 400; font-style: italic; color: var(--green); }
+  .shell-head p { font-size: 14px; color: var(--mute); margin-top: 8px; }
+  .shell-head .back { display: inline-block; font-size: 13px; color: var(--mute); text-decoration: none; margin-bottom: 16px; }
+  .shell-head .back:hover { color: var(--green); }
+
+  /* ---- Pattern nav ---- */
+  .pat-nav { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 36px; }
+  .pat-nav button {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-full);
+    padding: 8px 16px; font-family: var(--sans); font-size: 12px; font-weight: 500;
+    color: var(--mute); cursor: pointer; transition: all .15s;
+    white-space: nowrap;
+  }
+  .pat-nav button:hover { border-color: var(--green); color: var(--green); }
+  .pat-nav button.on { background: var(--green); color: #F5F2ED; border-color: var(--green); }
+
+  /* ---- Mobile frame ---- */
+  .frame-wrap { display: flex; justify-content: center; }
+  .frame-outer { display: none; flex-direction: column; align-items: center; gap: 16px; }
+  .frame-outer.active { display: flex; }
+  .frame-label { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--mute-2); text-align: center; }
+  .frame-caption {
+    max-width: 420px; text-align: center; font-size: 13px; color: var(--mute); line-height: 1.55;
+    padding: 0 16px;
+  }
+  .frame-caption strong { color: var(--green); font-weight: 600; }
+  .phone {
+    width: 390px; min-height: 844px; background: var(--bg); border-radius: 40px;
+    border: 8px solid #1A1D1A; overflow: hidden; position: relative;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.18), 0 4px 20px rgba(0,0,0,0.08);
+  }
+  .phone::before {
+    content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 120px; height: 28px; background: #1A1D1A; border-radius: 0 0 16px 16px; z-index: 10;
+  }
+
+  /* ---- Shared mobile styles ---- */
+  .mob-status { height: 54px; padding: 16px 24px 0; display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 600; position: relative; z-index: 5; }
+  .mob-status .time { margin-left: 4px; }
+  .mob-status .icons { display: flex; gap: 5px; align-items: center; }
+  .mob-status .icons svg { width: 16px; height: 16px; }
+  .mob-nav {
+    display: flex; justify-content: space-around; padding: 10px 0 28px;
+    border-top: 1px solid var(--line-light); background: var(--bg); margin-top: auto;
+  }
+  .mob-nav .tab { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 10px; color: var(--mute-2); }
+  .mob-nav .tab.on { color: var(--green); }
+  .mob-nav .tab svg { width: 22px; height: 22px; }
+  .mob-header { padding: 8px 24px 16px; display: flex; justify-content: space-between; align-items: center; }
+  .mob-header h2 { font-family: var(--serif); font-size: 24px; font-weight: 400; }
+  .mob-scroll { flex: 1; overflow-y: auto; padding: 0 24px 24px; display: flex; flex-direction: column; gap: 16px; }
+
+  .card {
+    background: var(--surface); border-radius: var(--r-lg); padding: 20px;
+    border: 1px solid var(--line-light);
+  }
+  .avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--green-muted); display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-size: 16px; color: var(--green); font-weight: 500; flex-shrink: 0; }
+  .pill { display: inline-block; padding: 4px 10px; border-radius: var(--r-full); font-size: 11px; font-weight: 500; letter-spacing: .04em; }
+  .pill-green { background: var(--green-light); color: var(--green); }
+  .link-soft { color: var(--green); font-size: 14px; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+  .link-soft:hover { text-decoration: underline; }
+  .serif { font-family: var(--serif); }
+  .divider { height: 1px; background: var(--line); margin: 12px 0; }
+
+  /* ---- Pattern 1: Provider card ---- */
+  .provider-card .top { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 14px; }
+  .provider-card .meta .name { font-weight: 600; font-size: 15px; }
+  .provider-card .meta .role { font-size: 12px; color: var(--mute); margin-top: 2px; }
+  .provider-card .body { font-size: 14px; line-height: 1.6; color: #3A3D3A; margin-bottom: 16px; }
+  .provider-card .body em { font-style: italic; }
+
+  /* ---- Pattern 2: Self-assessment ---- */
+  .assess-tile {
+    background: linear-gradient(135deg, var(--green-light) 0%, #F0F5F2 100%);
+    border-radius: var(--r-lg); padding: 24px 20px; border: 1px solid var(--green-muted);
+    cursor: pointer; transition: transform .15s;
+  }
+  .assess-tile:hover { transform: translateY(-1px); }
+  .assess-tile .eyebrow { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--green); margin-bottom: 10px; font-weight: 600; }
+  .assess-tile h3 { font-family: var(--serif); font-size: 20px; font-weight: 400; line-height: 1.25; color: var(--ink); margin-bottom: 8px; }
+  .assess-tile p { font-size: 13px; color: var(--mute); line-height: 1.5; margin-bottom: 16px; }
+  .assess-tile .start-link { font-size: 14px; }
+
+  .assess-flow { display: none; }
+  .assess-flow.active { display: block; }
+  .assess-q { display: none; }
+  .assess-q.active { display: block; }
+  .assess-q h3 { font-family: var(--serif); font-size: 22px; font-weight: 400; line-height: 1.3; margin-bottom: 8px; }
+  .assess-q p.sub { font-size: 13px; color: var(--mute); margin-bottom: 20px; }
+  .assess-q .options { display: flex; flex-direction: column; gap: 10px; }
+  .assess-q .opt {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md);
+    padding: 16px; font-size: 14px; cursor: pointer; transition: all .15s; text-align: left;
+    font-family: var(--sans); color: var(--ink);
+  }
+  .assess-q .opt:hover { border-color: var(--green); background: var(--green-light); }
+  .assess-q .progress { display: flex; gap: 6px; margin-bottom: 20px; }
+  .assess-q .progress .dot { width: 32px; height: 4px; border-radius: 2px; background: var(--line); }
+  .assess-q .progress .dot.done { background: var(--green); }
+
+  .assess-result { display: none; }
+  .assess-result.active { display: block; }
+  .assess-result .badge { display: inline-flex; align-items: center; gap: 6px; background: var(--green-light); color: var(--green); border-radius: var(--r-full); padding: 6px 14px; font-size: 13px; font-weight: 500; margin-bottom: 16px; }
+  .assess-result h3 { font-family: var(--serif); font-size: 24px; font-weight: 400; line-height: 1.25; margin-bottom: 12px; }
+  .assess-result .reasons { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+  .assess-result .reasons li { display: flex; gap: 10px; font-size: 14px; line-height: 1.5; color: #3A3D3A; }
+  .assess-result .reasons .icon { width: 20px; height: 20px; flex-shrink: 0; color: var(--green); margin-top: 2px; }
+  .assess-result .reset { font-size: 13px; color: var(--mute); background: none; border: none; cursor: pointer; text-decoration: underline; margin-top: 8px; font-family: var(--sans); }
+
+  /* ---- Pattern 3: AI chat ---- */
+  .chat-area { flex: 1; display: flex; flex-direction: column; gap: 12px; padding: 16px 24px; overflow-y: auto; }
+  .bubble { max-width: 85%; padding: 14px 16px; font-size: 14px; line-height: 1.55; border-radius: 18px; }
+  .bubble.bot { background: var(--surface); border: 1px solid var(--line-light); align-self: flex-start; border-bottom-left-radius: 4px; }
+  .bubble.user { background: var(--green); color: #F5F2ED; align-self: flex-end; border-bottom-right-radius: 4px; }
+  .bubble .bot-name { font-size: 11px; font-weight: 600; color: var(--green); margin-bottom: 6px; letter-spacing: .04em; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; align-self: flex-end; }
+  .chips button {
+    background: var(--surface); border: 1px solid var(--green); border-radius: var(--r-full);
+    padding: 8px 16px; font-size: 13px; color: var(--green); cursor: pointer;
+    font-family: var(--sans); font-weight: 500; transition: all .15s;
+  }
+  .chips button:hover { background: var(--green-light); }
+  .chat-input-bar {
+    display: flex; gap: 10px; padding: 12px 24px 28px; border-top: 1px solid var(--line-light);
+    background: var(--bg); align-items: center;
+  }
+  .chat-input-bar input {
+    flex: 1; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-full);
+    padding: 12px 16px; font-size: 14px; font-family: var(--sans); color: var(--ink);
+  }
+  .chat-input-bar input::placeholder { color: var(--mute-2); }
+
+  /* ---- Pattern 4: Article footer ---- */
+  .article-body h2 { font-family: var(--serif); font-size: 26px; font-weight: 400; line-height: 1.2; margin-bottom: 16px; }
+  .article-body p { font-size: 15px; line-height: 1.7; color: #3A3D3A; margin-bottom: 16px; }
+  .article-body .read-tag { font-size: 12px; color: var(--mute); margin-bottom: 16px; }
+  .article-footer-module {
+    background: var(--green-light); border-radius: var(--r-lg); padding: 20px;
+    border: 1px solid var(--green-muted); margin-top: 8px;
+  }
+  .article-footer-module .eyebrow { font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--green); margin-bottom: 10px; font-weight: 600; }
+  .article-footer-module h4 { font-family: var(--serif); font-size: 18px; font-weight: 400; font-style: italic; line-height: 1.3; margin-bottom: 10px; color: var(--ink); }
+  .article-footer-module .provider-row { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
+  .article-footer-module .provider-row .sm-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--green-muted); display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-size: 13px; color: var(--green); }
+  .article-footer-module .provider-row .p-meta { font-size: 12px; color: var(--mute); }
+  .article-footer-module .provider-row .p-meta strong { color: var(--ink); font-weight: 500; }
+  .article-footer-module .desc { font-size: 13px; color: var(--mute); line-height: 1.55; margin-bottom: 14px; }
+
+  /* ---- Pattern 5: Programs comparison ---- */
+  .programs-scroll { display: flex; gap: 14px; overflow-x: auto; padding: 0 24px 24px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+  .programs-scroll::-webkit-scrollbar { display: none; }
+  .prog-card {
+    min-width: 300px; scroll-snap-align: start;
+    background: var(--surface); border-radius: var(--r-lg); border: 1px solid var(--line-light);
+    padding: 24px 20px; display: flex; flex-direction: column;
+  }
+  .prog-card .prog-name { font-family: var(--serif); font-size: 20px; font-weight: 400; margin-bottom: 4px; }
+  .prog-card .prog-for { font-size: 13px; color: var(--mute); margin-bottom: 16px; line-height: 1.45; }
+  .prog-card .prog-detail { display: flex; justify-content: space-between; padding: 10px 0; border-top: 1px solid var(--line-light); font-size: 13px; }
+  .prog-card .prog-detail .k { color: var(--mute); }
+  .prog-card .prog-detail .v { font-weight: 500; text-align: right; max-width: 55%; }
+  .prog-card .prog-includes { margin-top: 14px; }
+  .prog-card .prog-includes .inc-label { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mute-2); margin-bottom: 8px; font-weight: 500; }
+  .prog-card .prog-includes li { font-size: 13px; line-height: 1.5; color: #3A3D3A; padding-left: 16px; position: relative; margin-bottom: 4px; list-style: none; }
+  .prog-card .prog-includes li::before { content: "·"; position: absolute; left: 0; color: var(--green); font-weight: 700; }
+  .prog-card .prog-cta { margin-top: auto; padding-top: 16px; }
+  .prog-card .prog-cta a { display: block; text-align: center; padding: 12px; border: 1px solid var(--green); border-radius: var(--r-full); font-size: 14px; font-weight: 500; color: var(--green); text-decoration: none; transition: all .15s; }
+  .prog-card .prog-cta a:hover { background: var(--green); color: #F5F2ED; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="shell-head">
+    <a href="../../" class="back">← All prototypes</a>
+    <h1>Cross-Sell Pattern Prototypes</h1>
+    <p>Five distinct cross-sell patterns for Maven consumer programs — tap to explore each</p>
+  </div>
+
+  <nav class="pat-nav" id="patNav">
+    <button class="on" data-p="1">1 · Provider Card</button>
+    <button data-p="2">2 · Self-Assessment</button>
+    <button data-p="3">3 · AI Nudge</button>
+    <button data-p="4">4 · Article Footer</button>
+    <button data-p="5">5 · Programs Compare</button>
+  </nav>
+
+  <div class="frame-wrap">
+
+    <!-- ==================== PATTERN 1 ==================== -->
+    <div class="frame-outer active" id="p1">
+      <div class="frame-label">Pattern 1 of 5</div>
+      <div class="phone">
+        <div class="mob-status"><span class="time">9:41</span><span class="icons"><svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="3" width="3" height="10" rx="1"/><rect x="5.5" y="5" width="3" height="8" rx="1"/><rect x="10" y="1" width="3" height="12" rx="1"/></svg></span></div>
+        <div class="mob-header"><h2 class="serif">Home</h2><div class="avatar">KM</div></div>
+        <div class="mob-scroll">
+          <div class="card" style="padding:16px 20px">
+            <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px">
+              <span class="pill pill-green">📅 Upcoming</span>
+            </div>
+            <div style="font-size:14px;color:var(--ink);font-weight:500">Follow-up with Dr. Patel</div>
+            <div style="font-size:13px;color:var(--mute);margin-top:4px">Tomorrow, 2:30 PM · Video visit</div>
+          </div>
+
+          <div class="card provider-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+              <span class="pill pill-green" style="font-size:10px;letter-spacing:.12em">FROM YOUR PROVIDER</span>
+              <span style="font-size:12px;color:var(--mute-2)">2 days ago</span>
+            </div>
+            <div class="top">
+              <div class="avatar" style="background:#C8B9A5;color:#5C4A35">MC</div>
+              <div class="meta">
+                <div class="name">Marie Christine, MD</div>
+                <div class="role">OB/GYN · Maven Care Team</div>
+              </div>
+            </div>
+            <div class="body">
+              Based on what we discussed about your sleep changes and cycle irregularity, I think you'd benefit from learning about our <em>Hormone Care program</em>. It's designed for exactly the stage you're in — and I'd be part of your care team.
+            </div>
+            <a href="#" class="link-soft" onclick="return false">Learn about Hormone Care <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="margin-top:1px"><path d="M5.5 3.5L9.5 7L5.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          </div>
+
+          <div class="card" style="padding:16px 20px">
+            <div style="font-size:13px;color:var(--mute);margin-bottom:8px">Your care team</div>
+            <div style="display:flex;gap:-4px">
+              <div class="avatar" style="width:36px;height:36px;font-size:12px;background:#C8B9A5;color:#5C4A35;border:2px solid var(--bg)">MC</div>
+              <div class="avatar" style="width:36px;height:36px;font-size:12px;margin-left:-8px;border:2px solid var(--bg)">SP</div>
+              <div class="avatar" style="width:36px;height:36px;font-size:12px;margin-left:-8px;background:#B5C4D6;color:#2A3D52;border:2px solid var(--bg)">JL</div>
+            </div>
+          </div>
+        </div>
+        <div class="mob-nav">
+          <div class="tab on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h3m10-10v9a1 1 0 01-1 1h-3"/></svg>Home</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>Schedule</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4m-7.7-2.3l2.8-2.8m9.8-9.8l2.8-2.8M1 12h4m14 0h4M4.3 4.3l2.8 2.8m9.8 9.8l2.8 2.8"/></svg>Explore</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg>Profile</div>
+        </div>
+      </div>
+      <div class="frame-caption"><strong>Trust mechanism: provider authority.</strong> The recommendation comes from a named clinician the user already knows — no algorithm, no marketing team.</div>
+    </div>
+
+    <!-- ==================== PATTERN 2 ==================== -->
+    <div class="frame-outer" id="p2">
+      <div class="frame-label">Pattern 2 of 5</div>
+      <div class="phone">
+        <div class="mob-status"><span class="time">9:41</span><span class="icons"><svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="3" width="3" height="10" rx="1"/><rect x="5.5" y="5" width="3" height="8" rx="1"/><rect x="10" y="1" width="3" height="12" rx="1"/></svg></span></div>
+        <div class="mob-header"><h2 class="serif">Home</h2><div class="avatar">KM</div></div>
+        <div class="mob-scroll" id="assessScroll">
+          <div id="assessTileWrap">
+            <div class="assess-tile" id="assessTile" onclick="startAssess()">
+              <div class="eyebrow">Self-check</div>
+              <h3>Wondering if Hormone Care is right for you?</h3>
+              <p>Answer 3 quick questions. No commitment, no data shared with your employer.</p>
+              <a href="#" class="link-soft start-link" onclick="event.preventDefault()">Take the 2-minute self-check <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="margin-top:1px"><path d="M5.5 3.5L9.5 7L5.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            </div>
+          </div>
+
+          <div class="assess-flow card" id="assessFlow">
+            <div class="assess-q active" data-q="1">
+              <div class="progress"><div class="dot done"></div><div class="dot"></div><div class="dot"></div></div>
+              <h3>Have you noticed changes in your menstrual cycle?</h3>
+              <p class="sub">Irregular periods, heavier or lighter flow, or skipped cycles.</p>
+              <div class="options">
+                <button class="opt" onclick="nextQ(2)">Yes, in the last 6 months</button>
+                <button class="opt" onclick="nextQ(2)">Yes, for over a year</button>
+                <button class="opt" onclick="nextQ(2)">No, not really</button>
+              </div>
+            </div>
+            <div class="assess-q" data-q="2">
+              <div class="progress"><div class="dot done"></div><div class="dot done"></div><div class="dot"></div></div>
+              <h3>Are you experiencing sleep disruption or hot flashes?</h3>
+              <p class="sub">Waking up at night, night sweats, difficulty falling asleep.</p>
+              <div class="options">
+                <button class="opt" onclick="nextQ(3)">Yes, regularly</button>
+                <button class="opt" onclick="nextQ(3)">Occasionally</button>
+                <button class="opt" onclick="nextQ(3)">No</button>
+              </div>
+            </div>
+            <div class="assess-q" data-q="3">
+              <div class="progress"><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div></div>
+              <h3>Have you spoken with a provider about perimenopause?</h3>
+              <p class="sub">A doctor, NP, or other clinician — in any setting.</p>
+              <div class="options">
+                <button class="opt" onclick="showResult()">Yes, and I have a plan</button>
+                <button class="opt" onclick="showResult()">Yes, but didn't get clear answers</button>
+                <button class="opt" onclick="showResult()">No, I haven't</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="assess-result card" id="assessResult">
+            <div class="badge"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.3 4L6 11.3 2.7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Good fit</div>
+            <h3>Hormone Care could be a good fit for you.</h3>
+            <p style="font-size:14px;color:var(--mute);margin-bottom:16px;line-height:1.55">Based on your answers, here's why:</p>
+            <ul class="reasons">
+              <li><svg class="icon" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M6 10l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Your symptoms align with early perimenopause — the stage where Hormone Care has the most impact.</li>
+              <li><svg class="icon" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M6 10l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>A menopause-certified MD can assess whether HRT or lifestyle changes are right for you.</li>
+              <li><svg class="icon" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M6 10l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>You'll get unlimited messaging with your care team between visits.</li>
+            </ul>
+            <a href="#" class="link-soft" onclick="return false">Explore Hormone Care <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="margin-top:1px"><path d="M5.5 3.5L9.5 7L5.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            <br/><button class="reset" onclick="resetAssess()">Retake self-check</button>
+          </div>
+        </div>
+        <div class="mob-nav">
+          <div class="tab on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h3m10-10v9a1 1 0 01-1 1h-3"/></svg>Home</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>Schedule</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4m-7.7-2.3l2.8-2.8m9.8-9.8l2.8-2.8M1 12h4m14 0h4M4.3 4.3l2.8 2.8m9.8 9.8l2.8 2.8"/></svg>Explore</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg>Profile</div>
+        </div>
+      </div>
+      <div class="frame-caption"><strong>Trust mechanism: user agency.</strong> The user initiates the exploration — no push. Honest result framing ("could be") avoids over-promising.</div>
+    </div>
+
+    <!-- ==================== PATTERN 3 ==================== -->
+    <div class="frame-outer" id="p3">
+      <div class="frame-label">Pattern 3 of 5</div>
+      <div class="phone" style="display:flex;flex-direction:column">
+        <div class="mob-status"><span class="time">9:41</span><span class="icons"><svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="3" width="3" height="10" rx="1"/><rect x="5.5" y="5" width="3" height="8" rx="1"/><rect x="10" y="1" width="3" height="12" rx="1"/></svg></span></div>
+        <div class="mob-header"><h2 class="serif">Maven Assistant</h2></div>
+        <div class="chat-area" id="chatArea">
+          <div class="bubble bot"><div class="bot-name">Maven Assistant</div>Hi Kate! I can help with appointments, questions about your care, or finding the right program.</div>
+          <div class="bubble user">What can help with hot flashes?</div>
+          <div class="bubble bot"><div class="bot-name">Maven Assistant</div>Hot flashes are one of the most common symptoms of perimenopause. There are several approaches — lifestyle changes, supplements, and for many women, hormone therapy (HRT) is the most effective option. Want me to go into detail?</div>
+          <div class="bubble user">Yes and also my sleep has been terrible</div>
+          <div class="bubble bot"><div class="bot-name">Maven Assistant</div>Sleep disruption and hot flashes are often connected — both are driven by hormonal shifts.<br><br>I've noticed you've asked about hot flashes and sleep a few times now. <strong style="color:var(--green)">Would you like me to explain how our Hormone Care program addresses these together?</strong> It's built around exactly these symptoms.</div>
+          <div class="chips" id="chatChips">
+            <button onclick="chatYes()">Yes, tell me more</button>
+            <button onclick="chatNo()">Not now</button>
+          </div>
+        </div>
+        <div class="chat-input-bar"><input type="text" placeholder="Ask Maven anything…" disabled /><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M18 2L9 11M18 2l-5 16-3-7-7-3 16-5z" stroke="var(--mute-2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div class="frame-caption"><strong>Trust mechanism: pattern recognition + opt-in.</strong> The AI observes repeated questions — doesn't guess intent. The user chooses whether to hear more.</div>
+    </div>
+
+    <!-- ==================== PATTERN 4 ==================== -->
+    <div class="frame-outer" id="p4">
+      <div class="frame-label">Pattern 4 of 5</div>
+      <div class="phone">
+        <div class="mob-status"><span class="time">9:41</span><span class="icons"><svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="3" width="3" height="10" rx="1"/><rect x="5.5" y="5" width="3" height="8" rx="1"/><rect x="10" y="1" width="3" height="12" rx="1"/></svg></span></div>
+        <div style="padding:8px 24px"><a href="#" onclick="return false" style="font-size:13px;color:var(--mute);text-decoration:none">← Back to articles</a></div>
+        <div class="mob-scroll">
+          <div class="article-body">
+            <div class="read-tag">6 min read · Hormonal Health</div>
+            <h2 class="serif">What's actually happening during perimenopause</h2>
+            <p>Perimenopause begins when your ovaries gradually produce less estrogen. For most women, this starts in the mid-40s — but it can begin as early as the late 30s.</p>
+            <p>The transition isn't a single event. It's a process that typically spans 4 to 8 years, during which hormone levels fluctuate unpredictably. This is why symptoms can feel so inconsistent — great one week, exhausting the next.</p>
+            <p>Common experiences during this time include irregular periods, sleep disruption, hot flashes, brain fog, mood changes, and shifts in libido. Many women describe feeling "not like themselves" without being able to point to a single cause.</p>
+            <p style="font-style:italic;color:var(--mute);border-left:3px solid var(--green-muted);padding-left:16px">The average woman spends a third of her life in post-menopause. How you navigate the transition matters.</p>
+          </div>
+          <div class="divider" style="margin:20px 0"></div>
+          <div class="article-footer-module">
+            <div class="eyebrow">Related program</div>
+            <h4>"This topic is at the heart of our Hormone Care program."</h4>
+            <div class="provider-row">
+              <div class="sm-avatar">GL</div>
+              <div class="p-meta"><strong>Dr. Grace Lewis</strong><br/>Menopause-certified MD · Maven Care Team</div>
+            </div>
+            <div class="desc">Personalized care for perimenopause and menopause — including monthly MD check-ins, HRT if appropriate, and unlimited messaging with your care team.</div>
+            <a href="#" class="link-soft" onclick="return false">Learn about Hormone Care <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="margin-top:1px"><path d="M5.5 3.5L9.5 7L5.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          </div>
+        </div>
+      </div>
+      <div class="frame-caption"><strong>Trust mechanism: contextual relevance.</strong> The cross-sell appears only at the end of related content — the user sought out this topic already.</div>
+    </div>
+
+    <!-- ==================== PATTERN 5 ==================== -->
+    <div class="frame-outer" id="p5">
+      <div class="frame-label">Pattern 5 of 5</div>
+      <div class="phone">
+        <div class="mob-status"><span class="time">9:41</span><span class="icons"><svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="3" width="3" height="10" rx="1"/><rect x="5.5" y="5" width="3" height="8" rx="1"/><rect x="10" y="1" width="3" height="12" rx="1"/></svg></span></div>
+        <div class="mob-header"><h2 class="serif">Explore Programs</h2></div>
+        <div style="padding:0 24px 12px;font-size:14px;color:var(--mute);line-height:1.5">Three programs, each designed for a different stage. No hierarchy — just the right fit for you.</div>
+        <div class="programs-scroll">
+          <div class="prog-card">
+            <div class="prog-name serif">Maven Clinic</div>
+            <div class="prog-for">On-demand telehealth for women's and family health. See a provider when you need one.</div>
+            <div class="prog-detail"><span class="k">Cost</span><span class="v">Pay per visit</span></div>
+            <div class="prog-detail"><span class="k">Commitment</span><span class="v">None — visit anytime</span></div>
+            <div class="prog-detail"><span class="k">Best for</span><span class="v">Acute needs, second opinions, specialist access</span></div>
+            <div class="prog-includes">
+              <div class="inc-label">Includes</div>
+              <ul>
+                <li>Video visits with 30+ specialties</li>
+                <li>Same-day appointments available</li>
+                <li>Prescription support</li>
+                <li>Secure messaging with providers</li>
+              </ul>
+            </div>
+            <div class="prog-cta"><a href="#" onclick="return false">Learn more</a></div>
+          </div>
+          <div class="prog-card">
+            <div class="prog-name serif">Hormone Care</div>
+            <div class="prog-for">Structured perimenopause and menopause care with a dedicated MD and care team.</div>
+            <div class="prog-detail"><span class="k">Cost</span><span class="v">$150 one-time + medication</span></div>
+            <div class="prog-detail"><span class="k">Commitment</span><span class="v">~3 months typical</span></div>
+            <div class="prog-detail"><span class="k">Best for</span><span class="v">Perimenopause symptoms, HRT evaluation, long-term hormone health</span></div>
+            <div class="prog-includes">
+              <div class="inc-label">Includes</div>
+              <ul>
+                <li>Menopause-certified MD</li>
+                <li>Monthly check-ins + dose adjustments</li>
+                <li>HRT or non-hormonal Rx</li>
+                <li>Unlimited Care Team messaging</li>
+                <li>2 free specialist consults</li>
+              </ul>
+            </div>
+            <div class="prog-cta"><a href="#" onclick="return false">Learn more</a></div>
+          </div>
+          <div class="prog-card">
+            <div class="prog-name serif">GLP-1 Care</div>
+            <div class="prog-for">Medical weight loss built for women's bodies — GLP-1 medication + clinical support.</div>
+            <div class="prog-detail"><span class="k">Cost</span><span class="v">$150/mo + medication</span></div>
+            <div class="prog-detail"><span class="k">Commitment</span><span class="v">Monthly subscription</span></div>
+            <div class="prog-detail"><span class="k">Best for</span><span class="v">Sustained weight loss, hormone-aware dosing, women on GLP-1s</span></div>
+            <div class="prog-includes">
+              <div class="inc-label">Includes</div>
+              <ul>
+                <li>Board-certified MD consultations</li>
+                <li>Brand-name GLP-1 prescriptions</li>
+                <li>Monthly dose adjustments</li>
+                <li>Nutrition + strength guidance</li>
+                <li>Insurance navigation</li>
+              </ul>
+            </div>
+            <div class="prog-cta"><a href="#" onclick="return false">Learn more</a></div>
+          </div>
+        </div>
+        <div class="mob-nav">
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h3m10-10v9a1 1 0 01-1 1h-3"/></svg>Home</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>Schedule</div>
+          <div class="tab on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4m-7.7-2.3l2.8-2.8m9.8-9.8l2.8-2.8M1 12h4m14 0h4M4.3 4.3l2.8 2.8m9.8 9.8l2.8 2.8"/></svg>Explore</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg>Profile</div>
+        </div>
+      </div>
+      <div class="frame-caption"><strong>Trust mechanism: neutral comparison.</strong> No "recommended for you" badge, no default hierarchy — the user browses all three equally and self-selects.</div>
+    </div>
+
+  </div><!-- /frame-wrap -->
+</div><!-- /shell -->
+
+<script>
+  // ---- Pattern nav ----
+  document.querySelectorAll('#patNav button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#patNav button').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      document.querySelectorAll('.frame-outer').forEach(f => f.classList.remove('active'));
+      document.getElementById('p' + btn.dataset.p).classList.add('active');
+    });
+  });
+
+  // ---- Pattern 2: Self-assessment ----
+  function startAssess() {
+    document.getElementById('assessTileWrap').style.display = 'none';
+    document.getElementById('assessFlow').style.display = 'block';
+  }
+  function nextQ(n) {
+    document.querySelectorAll('.assess-q').forEach(q => q.classList.remove('active'));
+    document.querySelector(`.assess-q[data-q="${n}"]`).classList.add('active');
+  }
+  function showResult() {
+    document.getElementById('assessFlow').style.display = 'none';
+    document.getElementById('assessResult').style.display = 'block';
+  }
+  function resetAssess() {
+    document.getElementById('assessResult').style.display = 'none';
+    document.getElementById('assessFlow').style.display = 'none';
+    document.getElementById('assessTileWrap').style.display = 'block';
+    document.querySelectorAll('.assess-q').forEach(q => q.classList.remove('active'));
+    document.querySelector('.assess-q[data-q="1"]').classList.add('active');
+  }
+
+  // ---- Pattern 3: AI chat ----
+  function chatYes() {
+    const chips = document.getElementById('chatChips');
+    chips.outerHTML = '<div class="bubble user">Yes, tell me more</div>';
+    const area = document.getElementById('chatArea');
+    setTimeout(() => {
+      const b = document.createElement('div');
+      b.className = 'bubble bot';
+      b.innerHTML = '<div class="bot-name">Maven Assistant</div><strong style="color:var(--green)">Hormone Care</strong> is a structured program for perimenopause and menopause. Here\'s how it helps with what you\'re experiencing:<br><br>• <strong>Hot flashes</strong> — your MD evaluates whether HRT is right for you and adjusts dosing monthly<br>• <strong>Sleep</strong> — progesterone (if prescribed) often improves sleep within weeks<br>• <strong>Ongoing support</strong> — unlimited messaging with your care team between visits<br><br>It\'s $150 to start, and your provider selects the right medication. Want me to check if you\'re eligible?';
+      area.appendChild(b);
+      b.scrollIntoView({ behavior: 'smooth' });
+    }, 600);
+  }
+  function chatNo() {
+    const chips = document.getElementById('chatChips');
+    chips.outerHTML = '<div class="bubble user">Not now</div>';
+    const area = document.getElementById('chatArea');
+    setTimeout(() => {
+      const b = document.createElement('div');
+      b.className = 'bubble bot';
+      b.innerHTML = '<div class="bot-name">Maven Assistant</div>No problem at all. If you change your mind or want to learn more later, just ask. I\'m always here. 💚';
+      area.appendChild(b);
+      b.scrollIntoView({ behavior: 'smooth' });
+    }, 600);
+  }
+</script>
+
+</body>
+</html>
