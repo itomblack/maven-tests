@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Maven — Clinic → Program Concepts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,300..500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:#F5F2ED; --surface:#FFFFFF; --green:#0F4D3F; --green-light:#E7F0EC;
+    --green-muted:#D4E5DC; --ink:#1A1D1A; --mute:#6B7269; --mute-2:#9A9E96;
+    --amber:#B4751F; --amber-light:#F6ECDD;
+    --line:rgba(20,22,18,0.10); --line-light:rgba(20,22,18,0.06);
+    --serif:"Fraunces",Georgia,serif; --sans:"Inter",system-ui,sans-serif;
+    --r-sm:12px; --r-md:16px; --r-lg:20px; --r-full:999px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{background:#E8E4DD;}
+  body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;}
+
+  .shell{max-width:1280px;margin:0 auto;padding:32px 24px 64px;}
+  .shell-head{text-align:center;margin-bottom:24px;}
+  .shell-head .back{display:inline-block;font-size:13px;color:var(--mute);text-decoration:none;margin-bottom:16px;}
+  .shell-head .back:hover{color:var(--green);}
+  .shell-head h1{font-family:var(--serif);font-size:28px;font-weight:400;font-style:italic;color:var(--green);}
+  .shell-head p{font-size:14px;color:var(--mute);margin-top:8px;max-width:620px;margin-left:auto;margin-right:auto;line-height:1.5;}
+
+  .pat-nav{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;}
+  .pat-nav button{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--r-full);
+    padding:8px 14px;font-family:var(--sans);font-size:12px;font-weight:500;
+    color:var(--mute);cursor:pointer;transition:all .15s;white-space:nowrap;
+  }
+  .pat-nav button:hover{border-color:var(--green);color:var(--green);}
+  .pat-nav button.on{background:var(--green);color:#F5F2ED;border-color:var(--green);}
+  .seg-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:32px;}
+  .seg-tag{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute-2);padding:4px 10px;border:1px dashed var(--line);border-radius:var(--r-full);}
+
+  .frame-wrap{display:flex;justify-content:center;}
+  .frame-outer{display:none;flex-direction:column;align-items:center;gap:14px;}
+  .frame-outer.active{display:flex;}
+  .frame-label{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute-2);text-align:center;}
+  .frame-meta{max-width:440px;text-align:center;}
+  .frame-meta .seg{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--green);font-weight:600;margin-bottom:6px;}
+  .frame-caption{font-size:13px;color:var(--mute);line-height:1.55;padding:0 16px;}
+  .frame-caption strong{color:var(--green);font-weight:600;}
+
+  .phone{
+    width:390px;min-height:844px;background:var(--bg);border-radius:40px;
+    border:8px solid #1A1D1A;overflow:hidden;position:relative;display:flex;flex-direction:column;
+    box-shadow:0 24px 80px rgba(0,0,0,0.18),0 4px 20px rgba(0,0,0,0.08);
+  }
+  .phone::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#1A1D1A;border-radius:0 0 16px 16px;z-index:10;}
+
+  .mob-status{height:54px;padding:16px 24px 0;display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:600;position:relative;z-index:5;flex-shrink:0;}
+  .mob-status .icons svg{width:16px;height:16px;}
+  .mob-header{padding:8px 24px 14px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+  .mob-header h2{font-family:var(--serif);font-size:24px;font-weight:400;}
+  .mob-back{padding:8px 24px 4px;flex-shrink:0;}
+  .mob-back a{font-size:13px;color:var(--mute);text-decoration:none;}
+  .mob-scroll{flex:1;overflow-y:auto;padding:0 20px 20px;display:flex;flex-direction:column;gap:14px;}
+  .mob-nav{display:flex;justify-content:space-around;padding:10px 0 26px;border-top:1px solid var(--line-light);background:var(--bg);flex-shrink:0;}
+  .mob-nav .tab{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;color:var(--mute-2);}
+  .mob-nav .tab.on{color:var(--green);}
+  .mob-nav .tab svg{width:22px;height:22px;}
+
+  .avatar{width:44px;height:44px;border-radius:50%;background:var(--green-muted);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:16px;color:var(--green);font-weight:500;flex-shrink:0;}
+  .avatar.sm{width:36px;height:36px;font-size:13px;}
+  .pill{display:inline-block;padding:4px 10px;border-radius:var(--r-full);font-size:11px;font-weight:500;letter-spacing:.04em;}
+  .pill-green{background:var(--green-light);color:var(--green);}
+  .pill-amber{background:var(--amber-light);color:var(--amber);}
+  .card{background:var(--surface);border-radius:var(--r-lg);padding:20px;border:1px solid var(--line-light);}
+  .link-soft{color:var(--green);font-size:14px;font-weight:500;text-decoration:none;display:inline-flex;align-items:center;gap:4px;cursor:pointer;}
+  .link-soft:hover{text-decoration:underline;}
+  .serif{font-family:var(--serif);}
+  .divider{height:1px;background:var(--line);margin:4px 0;}
+  .btn-primary{display:block;width:100%;text-align:center;background:var(--green);color:#F5F2ED;border:none;border-radius:var(--r-full);padding:14px;font-family:var(--sans);font-size:14px;font-weight:500;cursor:pointer;text-decoration:none;}
+  .btn-ghost{display:block;width:100%;text-align:center;background:transparent;color:var(--green);border:1px solid var(--green);border-radius:var(--r-full);padding:13px;font-family:var(--sans);font-size:14px;font-weight:500;cursor:pointer;text-decoration:none;}
+  .chevron{width:14px;height:14px;}
+
+  /* ---- C1 timeline ---- */
+  .tl{position:relative;padding-left:32px;}
+  .tl::before{content:"";position:absolute;left:9px;top:6px;bottom:30px;width:2px;background:var(--green-muted);}
+  .tl-node{position:relative;margin-bottom:22px;}
+  .tl-node::before{content:"";position:absolute;left:-31px;top:2px;width:18px;height:18px;border-radius:50%;background:var(--green);border:3px solid var(--bg);}
+  .tl-node.future::before{background:var(--bg);border:2px dashed var(--green);}
+  .tl-node .date{font-size:11px;color:var(--mute-2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;}
+  .tl-node .tl-title{font-size:14px;font-weight:600;}
+  .tl-node .tl-sub{font-size:13px;color:var(--mute);margin-top:2px;line-height:1.45;}
+  .tl-future-card{background:var(--green-light);border:1px solid var(--green-muted);border-radius:var(--r-md);padding:16px;margin-top:8px;}
+  .tl-future-card h4{font-family:var(--serif);font-size:17px;font-weight:400;font-style:italic;margin-bottom:6px;}
+
+  /* ---- C2 visit summary ---- */
+  .summary-line{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line-light);}
+  .summary-line:last-child{border-bottom:none;}
+  .summary-line .ico{width:32px;height:32px;border-radius:8px;background:var(--green-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--green);}
+  .summary-line .st{font-size:14px;font-weight:500;}
+  .summary-line .sd{font-size:13px;color:var(--mute);margin-top:2px;line-height:1.45;}
+  .summary-line.rec{background:var(--green-light);margin:8px -8px 0;padding:14px 16px;border-radius:var(--r-md);border-bottom:none;}
+
+  /* ---- C3 goals ---- */
+  .goal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .goal-tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:18px 14px;cursor:pointer;transition:all .15s;text-align:left;font-family:var(--sans);}
+  .goal-tile:hover{border-color:var(--green);}
+  .goal-tile.sel{border-color:var(--green);background:var(--green-light);}
+  .goal-tile .gi{font-size:22px;margin-bottom:8px;display:block;}
+  .goal-tile .gt{font-size:13px;font-weight:500;line-height:1.3;}
+  .goal-result{display:none;}
+  .goal-result.active{display:flex;flex-direction:column;gap:12px;}
+  .opt-card{background:var(--surface);border:1px solid var(--line-light);border-radius:var(--r-md);padding:16px;}
+  .opt-card .ot{font-size:14px;font-weight:600;}
+  .opt-card .ot .tag{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:var(--r-full);margin-left:8px;vertical-align:middle;}
+  .opt-card .od{font-size:13px;color:var(--mute);margin:6px 0 12px;line-height:1.5;}
+
+  /* ---- C4 levels ---- */
+  .ladder{display:flex;flex-direction:column;gap:0;}
+  .rung{display:flex;gap:14px;padding:16px 0;position:relative;}
+  .rung .rail{display:flex;flex-direction:column;align-items:center;}
+  .rung .dot{width:16px;height:16px;border-radius:50%;background:var(--green-muted);border:3px solid var(--bg);z-index:2;}
+  .rung .dot.cur{background:var(--green);box-shadow:0 0 0 4px var(--green-light);}
+  .rung .conn{width:2px;flex:1;background:var(--green-muted);}
+  .rung:last-child .conn{display:none;}
+  .rung .rbody{padding-bottom:8px;flex:1;}
+  .rung .rlvl{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute-2);}
+  .rung .rname{font-family:var(--serif);font-size:18px;font-weight:400;margin:2px 0 4px;}
+  .rung .rdesc{font-size:13px;color:var(--mute);line-height:1.5;}
+  .rung .rcost{font-size:12px;color:var(--green);font-weight:500;margin-top:6px;}
+  .rung.current .rbody{background:var(--green-light);border-radius:var(--r-md);padding:14px 16px;margin-left:-4px;}
+  .rung.next .rname{color:var(--green);}
+
+  /* ---- C5 insight ---- */
+  .insight-card{background:var(--surface);border:1px solid var(--line-light);border-radius:var(--r-lg);padding:20px;}
+  .insight-card .eye{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--green);font-weight:600;margin-bottom:14px;}
+  .insight-card h3{font-family:var(--serif);font-size:20px;font-weight:400;line-height:1.3;margin-bottom:12px;}
+  .mention{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:var(--bg);border-radius:var(--r-sm);margin-bottom:8px;font-size:13px;line-height:1.45;}
+  .mention .q{color:var(--mute-2);font-size:11px;flex-shrink:0;margin-top:1px;}
+  .mention em{font-style:italic;color:var(--ink);}
+  .insight-detail{display:none;margin-top:8px;padding-top:14px;border-top:1px solid var(--line-light);}
+  .insight-detail.open{display:block;}
+  .insight-detail p{font-size:14px;line-height:1.6;color:#3A3D3A;margin-bottom:14px;}
+
+  /* ---- C6 resume ---- */
+  .resume-card{background:var(--surface);border:1px solid var(--green-muted);border-radius:var(--r-lg);padding:20px;}
+  .resume-card .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+  .progress-track{height:6px;background:var(--green-light);border-radius:3px;overflow:hidden;margin:14px 0 6px;}
+  .progress-track .fill{height:100%;width:50%;background:var(--green);border-radius:3px;}
+  .steps{margin:16px 0;display:flex;flex-direction:column;gap:10px;}
+  .step{display:flex;gap:10px;align-items:center;font-size:14px;}
+  .step .sc{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;}
+  .step .sc.done{background:var(--green);color:#fff;}
+  .step .sc.now{background:var(--green-light);color:var(--green);border:2px solid var(--green);}
+  .step .sc.todo{background:var(--bg);color:var(--mute-2);border:1px solid var(--line);}
+  .step.todo-row{color:var(--mute);}
+  .deflect{display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--line-light);}
+  .deflect.open{display:block;}
+  .deflect .dq{font-size:13px;color:var(--mute);margin-bottom:10px;}
+  .deflect .dchips{display:flex;gap:8px;flex-wrap:wrap;}
+  .deflect .dchips button{background:var(--bg);border:1px solid var(--line);border-radius:var(--r-full);padding:8px 14px;font-size:12px;color:var(--ink);cursor:pointer;font-family:var(--sans);}
+  .deflect .dchips button:hover{border-color:var(--green);}
+
+  /* ---- C7 alternative finder ---- */
+  .elig-banner{text-align:center;padding:8px 0 4px;}
+  .elig-banner .ico{width:56px;height:56px;border-radius:50%;background:var(--amber-light);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;color:var(--amber);}
+  .elig-banner h3{font-family:var(--serif);font-size:22px;font-weight:400;line-height:1.3;margin-bottom:8px;}
+  .elig-banner p{font-size:14px;color:var(--mute);line-height:1.55;}
+  .alt-card{display:flex;gap:14px;align-items:flex-start;}
+  .alt-card .ai{width:40px;height:40px;border-radius:10px;background:var(--green-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--green);}
+  .alt-card .at{font-size:14px;font-weight:600;}
+  .alt-card .ad{font-size:13px;color:var(--mute);margin-top:3px;line-height:1.5;}
+
+  /* ---- C8 companion check ---- */
+  .companion-intro{text-align:center;padding:4px 0;}
+  .companion-intro .badge{display:inline-flex;align-items:center;gap:6px;background:var(--green-light);color:var(--green);border-radius:var(--r-full);padding:6px 14px;font-size:12px;font-weight:500;margin-bottom:14px;}
+  .companion-intro h3{font-family:var(--serif);font-size:22px;font-weight:400;line-height:1.3;margin-bottom:10px;}
+  .companion-intro p{font-size:14px;color:var(--mute);line-height:1.55;}
+  .cc-q{display:none;}
+  .cc-q.active{display:block;}
+  .cc-q h3{font-family:var(--serif);font-size:21px;font-weight:400;line-height:1.3;margin-bottom:18px;}
+  .cc-q .opt{display:block;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:16px;font-size:14px;cursor:pointer;text-align:left;font-family:var(--sans);color:var(--ink);margin-bottom:10px;transition:all .15s;}
+  .cc-q .opt:hover{border-color:var(--green);background:var(--green-light);}
+  .cc-prog{display:flex;gap:6px;margin-bottom:18px;}
+  .cc-prog .d{width:28px;height:4px;border-radius:2px;background:var(--line);}
+  .cc-prog .d.on{background:var(--green);}
+  .cc-result{display:none;}
+  .cc-result.active{display:block;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="shell-head">
+    <a href="../../" class="back">← All prototypes</a>
+    <h1>Virtual Clinic → Program Enrollment</h1>
+    <p>Eight distinct UX concepts for helping Virtual Clinic members discover the right level of care — framed as clinical guidance, not upsell. Tap a concept; each has a different IA.</p>
+  </div>
+  <nav class="pat-nav" id="patNav">
+    <button class="on" data-p="1">1 · Care Timeline</button>
+    <button data-p="2">2 · Provider Rec</button>
+    <button data-p="3">3 · Health Goals</button>
+    <button data-p="4">4 · Levels of Care</button>
+    <button data-p="5">5 · Symptom Insight</button>
+    <button data-p="6">6 · Resume Enrollment</button>
+    <button data-p="7">7 · Alt Care Finder</button>
+    <button data-p="8">8 · Companion Check</button>
+  </nav>
+  <div class="seg-row" id="segRow"></div>
+
+  <div class="frame-wrap">
+    <!-- ============ CONCEPT 1 · Care Journey Timeline ============ -->
+    <div class="frame-outer active" id="p1">
+      <div class="frame-label">Concept 1 — Care Journey Timeline</div>
+      <div class="phone">
+        <div class="mob-status"><span>9:41</span><span class="icons"><svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="3" width="3" height="10" rx="1"/><rect x="5.5" y="5" width="3" height="8" rx="1"/><rect x="10" y="1" width="3" height="12" rx="1"/></svg></span></div>
+        <div class="mob-header"><h2 class="serif">Your care</h2><div class="avatar">KM</div></div>
+        <div class="mob-scroll">
+          <p style="font-size:13px;color:var(--mute);line-height:1.5">A thread of everything we've done together. Where it goes next is up to you.</p>
+          <div class="tl">
+            <div class="tl-node future">
+              <div class="date">The next step</div>
+              <div class="tl-future-card">
+                <h4>Ongoing hormone support</h4>
+                <div class="tl-sub" style="margin-bottom:12px">Across your last 3 visits, sleep and cycle changes have come up each time. A structured program gives you one care team tracking this over months — not visit by visit.</div>
+                <a class="link-soft" onclick="return false">See what ongoing care includes <svg class="chevron" viewBox="0 0 14 14" fill="none"><path d="M5.5 3.5L9.5 7L5.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+              </div>
+            </div>
+            <div class="tl-node">
+              <div class="date">2 weeks ago</div>
+              <div class="tl-title">Visit · Dr. Marie Christine</div>
+              <div class="tl-sub">Discussed sleep disruption & irregular cycle. Labs ordered.</div>
+            </div>
+            <div class="tl-node">
+              <div class="date">6 weeks ago</div>
+              <div class="tl-title">Message · Care Team</div>
+              <div class="tl-sub">Asked about night sweats and managing fatigue.</div>
+            </div>
+            <div class="tl-node">
+              <div class="date">3 months ago</div>
+              <div class="tl-title">Visit · Dr. Sana Patel</div>
+              <div class="tl-sub">First appointment — cycle changes & energy.</div>
+            </div>
+          </div>
+        </div>
+        <div class="mob-nav">
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h3m10-10v9a1 1 0 01-1 1h-3"/></svg>Home</div>
+          <div class="tab on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zM12 8v4l3 2"/></svg>Your care</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4M4.3 4.3l2.8 2.8m9.8 9.8l2.8 2.8M1 12h4m14 0h4"/></svg>Explore</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg>Profile</div>
+        </div>
+      </div>
+      <div class="frame-meta">
+        <div class="seg">Dir B + D · Segment 1</div>
+        <div class="frame-caption"><strong>Trust: narrative continuity.</strong> Built from the member's real history; the program is the thread continuing, not a product inserted. Empty for brand-new members (pair with a goal-based surface).</div>
+      </div>
+    </div>
+
+    <!-- ============ CONCEPT 2 · Provider Recommendation in Visit Summary ============ -->
+    <div class="frame-outer" id="p2">
+      <div class="frame-label">Concept 2 — Provider Recommendation (Visit Summary)</div>
+      <div class="phone">
+        <div class="mob-status"><span>9:41</span><span class="icons"><svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="3" width="3" height="10" rx="1"/><rect x="5.5" y="5" width="3" height="8" rx="1"/><rect x="10" y="1" width="3" height="12" rx="1"/></svg></span></div>
+        <div class="mob-back"><a onclick="return false">← Visit history</a></div>
+        <div class="mob-header"><h2 class="serif">Visit summary</h2></div>
+        <div class="mob-scroll">
+          <div class="card" style="padding:16px 20px">
+            <div style="display:flex;gap:12px;align-items:center">
+              <div class="avatar" style="background:#C8B9A5;color:#5C4A35">MC</div>
+              <div><div style="font-weight:600;font-size:15px">Dr. Marie Christine</div><div style="font-size:12px;color:var(--mute)">OB/GYN · Today, 2:30 PM</div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute-2);margin-bottom:6px;font-weight:600">After-visit summary</div>
+            <div class="summary-line">
+              <div class="ico"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M8 3v10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+              <div><div class="st">Assessment</div><div class="sd">Symptoms consistent with early perimenopause.</div></div>
+            </div>
+            <div class="summary-line">
+              <div class="ico"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="10" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M6 6h4M6 9h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+              <div><div class="st">Labs ordered</div><div class="sd">FSH, estradiol, thyroid panel.</div></div>
+            </div>
+            <div class="summary-line">
+              <div class="ico"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v8m0 0l-3-3m3 3l3-3M3 13h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div><div class="st">Self-care</div><div class="sd">Sleep hygiene notes attached.</div></div>
+            </div>
+            <div class="summary-line rec">
+              <div class="ico" style="background:var(--green);color:#fff"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5l1.8 3.7 4 .6-2.9 2.8.7 4L8 10.7 4.4 12.6l.7-4L2.2 5.8l4-.6L8 1.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg></div>
+              <div>
+                <div class="st">Marie recommends: Hormone Care</div>
+                <div class="sd" style="color:#3A3D3A">"This is the stage where structured support makes the biggest difference. I'd stay on your care team."</div>
+                <a class="link-soft" style="margin-top:10px" onclick="return false">Read recommendation <svg class="chevron" viewBox="0 0 14 14" fill="none"><path d="M5.5 3.5L9.5 7L5.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <a class="btn-ghost" onclick="return false">Message your care team</a>
+          </div>
+        </div>
+      </div>
+      <div class="frame-meta">
+        <div class="seg">Dir C · Segment 1</div>
+        <div class="frame-caption"><strong>Trust: provider authority.</strong> The recommendation sits inside the clinical document, co-signed by a named clinician — reads as medical advice. Guardrail: only shown when genuinely indicated, never default.</div>
+      </div>
+    </div>
+
+    <!-- ============ CONCEPT 3 · Health Goals Hub ============ -->
+    <div class="frame-outer" id="p3">
+      <div class="frame-label">Concept 3 — Health Goals Hub</div>
+      <div class="phone">
+        <div class="mob-status"><span>9:41</span><span class="icons"><svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="3" width="3" height="10" rx="1"/><rect x="5.5" y="5" width="3" height="8" rx="1"/><rect x="10" y="1" width="3" height="12" rx="1"/></svg></span></div>
+        <div class="mob-header"><h2 class="serif">Your goals</h2></div>
+        <div class="mob-scroll">
+          <p id="goalIntro" style="font-size:14px;color:var(--mute);line-height:1.55">What are you hoping to work on? We'll point you to the right level of care — sometimes that's a single visit, sometimes a program.</p>
+          <div class="goal-grid" id="goalGrid">
+            <button class="goal-tile" data-label="manage menopause symptoms" onclick="pickGoal(this)"><span class="gi">🌿</span><span class="gt">Manage menopause symptoms</span></button>
+            <button class="goal-tile" data-label="lose weight" onclick="pickGoal(this)"><span class="gi">⚖️</span><span class="gt">Lose weight sustainably</span></button>
+            <button class="goal-tile" data-label="improve energy" onclick="pickGoal(this)"><span class="gi">⚡</span><span class="gt">Improve energy & sleep</span></button>
+            <button class="goal-tile" data-label="improve metabolic health" onclick="pickGoal(this)"><span class="gi">❤️</span><span class="gt">Improve metabolic health</span></button>
+          </div>
+
+          <div class="goal-result" id="goalResult">
+            <div style="font-size:13px;color:var(--mute)">For <strong id="goalChosen" style="color:var(--ink)">—</strong>, here's the range of support — lightest to most comprehensive:</div>
+            <div class="opt-card">
+              <div class="ot">Read & learn<span class="tag" style="background:var(--bg);color:var(--mute)">Free</span></div>
+              <div class="od">Evidence-based articles and symptom guides. Start here if you're just exploring.</div>
+              <a class="link-soft" onclick="return false">Browse articles</a>
+            </div>
+            <div class="opt-card">
+              <div class="ot">Single visit<span class="tag" style="background:var(--green-light);color:var(--green)">Pay per visit</span></div>
+              <div class="od">Talk it through with a provider once. Good for a specific question or first assessment.</div>
+              <a class="link-soft" onclick="return false">Book a visit</a>
+            </div>
+            <div class="opt-card" style="border-color:var(--green-muted);background:var(--green-light)">
+              <div class="ot">Ongoing program<span class="tag" style="background:var(--green);color:#fff">Comprehensive</span></div>
+              <div class="od">A dedicated care team tracking you over months, with a treatment plan and unlimited messaging.</div>
+              <a class="link-soft" onclick="return false">See the program</a>
+            </div>
+            <button class="link-soft" style="background:none;border:none;font-family:var(--sans);margin-top:4px" onclick="resetGoal()">← Choose a different goal</button>
+          </div>
+        </div>
+        <div class="mob-nav">
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h3m10-10v9a1 1 0 01-1 1h-3"/></svg>Home</div>
+          <div class="tab on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1-6.3-4.6L5.7 21 8 14 2 9.4h7.6L12 2z"/></svg>Goals</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4M4.3 4.3l2.8 2.8m9.8 9.8l2.8 2.8M1 12h4m14 0h4"/></svg>Explore</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg>Profile</div>
+        </div>
+      </div>
+      <div class="frame-meta">
+        <div class="seg">Dir E · Segment 1</div>
+        <div class="frame-caption"><strong>Trust: member agency + honesty.</strong> The member declares intent; results always include the free and the cheap path, so the program never feels forced. Works for brand-new members with zero history.</div>
+      </div>
+    </div>
+
+    <!-- ============ CONCEPT 4 · Levels of Care Navigator ============ -->
+    <div class="frame-outer" id="p4">
+      <div class="frame-label">Concept 4 — Levels of Care Navigator</div>
+      <div class="phone">
+        <div class="mob-status"><span>9:41</span><span class="icons"><svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="3" width="3" height="10" rx="1"/><rect x="5.5" y="5" width="3" height="8" rx="1"/><rect x="10" y="1" width="3" height="12" rx="1"/></svg></span></div>
+        <div class="mob-header"><h2 class="serif">Levels of care</h2></div>
+        <div class="mob-scroll">
+          <p style="font-size:14px;color:var(--mute);line-height:1.55">Care comes in levels. You're here today — this is what deeper, ongoing care looks like if you ever need it.</p>
+          <div class="ladder">
+            <div class="rung">
+              <div class="rail"><div class="dot"></div><div class="conn"></div></div>
+              <div class="rbody"><div class="rlvl">Level 1 · Explore</div><div class="rname serif">Read & learn</div><div class="rdesc">Articles, symptom guides, community.</div><div class="rcost">Free</div></div>
+            </div>
+            <div class="rung current">
+              <div class="rail"><div class="dot cur"></div><div class="conn"></div></div>
+              <div class="rbody">
+                <div class="rlvl">Level 2 · Assess &amp; treat — you're here</div>
+                <div class="rname serif">Virtual Clinic visits</div>
+                <div class="rdesc">Book a provider when something comes up. Episodic, on your terms.</div>
+                <div class="rcost">Pay per visit</div>
+              </div>
+            </div>
+            <div class="rung next">
+              <div class="rail"><div class="dot"></div><div class="conn"></div></div>
+              <div class="rbody">
+                <div class="rlvl">Level 3 · Ongoing care</div>
+                <div class="rname serif">Structured program</div>
+                <div class="rdesc">A dedicated care team, a treatment plan, and monthly check-ins for a condition like perimenopause or weight.</div>
+                <div class="rcost">$150 to start · then monthly where applicable</div>
+                <a class="link-soft" style="margin-top:10px" onclick="return false">See what ongoing care includes <svg class="chevron" viewBox="0 0 14 14" fill="none"><path d="M5.5 3.5L9.5 7L5.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+              </div>
+            </div>
+            <div class="rung">
+              <div class="rail"><div class="dot"></div></div>
+              <div class="rbody"><div class="rlvl">Level 4 · Maintain</div><div class="rname serif">Long-term management</div><div class="rdesc">Ongoing monitoring once you're stable.</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="mob-nav">
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h3m10-10v9a1 1 0 01-1 1h-3"/></svg>Home</div>
+          <div class="tab on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20h4V10H4zM10 20h4V4h-4zM16 20h4v-8h-4z"/></svg>Care levels</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4M4.3 4.3l2.8 2.8m9.8 9.8l2.8 2.8M1 12h4m14 0h4"/></svg>Explore</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg>Profile</div>
+        </div>
+      </div>
+      <div class="frame-meta">
+        <div class="seg">Dir D · Segment 1</div>
+        <div class="frame-caption"><strong>Trust: transparency.</strong> "Levels of care" is a real clinical framework, not a pricing tier. Showing cost + commitment up front lets members self-qualify. Risk: must avoid looking like a SaaS plan page.</div>
+      </div>
+    </div>
+
+    <!-- ============ CONCEPT 5 · Symptom Pattern Insight ============ -->
+    <div class="frame-outer" id="p5">
+      <div class="frame-label">Concept 5 — Symptom Pattern Insight</div>
+      <div class="phone">
+        <div class="mob-status"><span>9:41</span><span class="icons"><svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="3" width="3" height="10" rx="1"/><rect x="5.5" y="5" width="3" height="8" rx="1"/><rect x="10" y="1" width="3" height="12" rx="1"/></svg></span></div>
+        <div class="mob-header"><h2 class="serif">Home</h2><div class="avatar">KM</div></div>
+        <div class="mob-scroll">
+          <div class="card" style="padding:16px 20px"><div style="font-size:14px;font-weight:500">Good morning, Kate</div><div style="font-size:13px;color:var(--mute);margin-top:4px">No upcoming appointments.</div></div>
+          <div class="insight-card">
+            <div class="eye"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M7 4.5v3l2 1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> A pattern in your own words</div>
+            <h3>You've mentioned a few related things lately.</h3>
+            <div class="mention"><span class="q">Mar 2</span><span>You asked: <em>"What helps with hot flashes at night?"</em></span></div>
+            <div class="mention"><span class="q">Feb 18</span><span>You asked: <em>"Why am I waking up at 3am?"</em></span></div>
+            <div class="mention"><span class="q">Feb 4</span><span>You noted: <em>"Periods getting unpredictable."</em></span></div>
+            <a class="link-soft" style="margin-top:8px" onclick="toggleInsight()">Why these connect <svg class="chevron" viewBox="0 0 14 14" fill="none"><path d="M3.5 5.5L7 9l3.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            <div class="insight-detail" id="insightDetail">
+              <p>Hot flashes, night waking, and cycle changes are commonly driven by the same hormonal shift in perimenopause. Treating them together — rather than one symptom at a time — tends to work better.</p>
+              <a class="btn-ghost" onclick="return false">See how a program addresses this</a>
+            </div>
+          </div>
+          <div class="card" style="padding:16px 20px"><div style="font-size:13px;color:var(--mute)">Recent articles for you</div><div style="font-size:14px;font-weight:500;margin-top:6px">Understanding the perimenopause transition</div></div>
+        </div>
+        <div class="mob-nav">
+          <div class="tab on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h3m10-10v9a1 1 0 01-1 1h-3"/></svg>Home</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 7V3m8 4V3M5 11h14M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>Schedule</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4M4.3 4.3l2.8 2.8m9.8 9.8l2.8 2.8M1 12h4m14 0h4"/></svg>Explore</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg>Profile</div>
+        </div>
+      </div>
+      <div class="frame-meta">
+        <div class="seg">Dir A · Segment 1</div>
+        <div class="frame-caption"><strong>Trust: recognition without surveillance.</strong> Uses the member's <em>own quoted words</em> with dates — "a pattern in your own words" — to defuse the "you're reading my messages" risk. The recommendation is the insight; the program is the optional resolution.</div>
+      </div>
+    </div>
+
+    <!-- ============ CONCEPT 6 · Resume Your Enrollment ============ -->
+    <div class="frame-outer" id="p6">
+      <div class="frame-label">Concept 6 — Resume Your Enrollment</div>
+      <div class="phone">
+        <div class="mob-status"><span>9:41</span><span class="icons"><svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="3" width="3" height="10" rx="1"/><rect x="5.5" y="5" width="3" height="8" rx="1"/><rect x="10" y="1" width="3" height="12" rx="1"/></svg></span></div>
+        <div class="mob-header"><h2 class="serif">Home</h2><div class="avatar">KM</div></div>
+        <div class="mob-scroll">
+          <div class="resume-card">
+            <div class="top">
+              <span class="pill pill-green">Pick up where you left off</span>
+              <span style="font-size:12px;color:var(--mute-2)">paused 4 days ago</span>
+            </div>
+            <div style="font-family:var(--serif);font-size:19px;font-weight:400;font-style:italic">Your Hormone Care enrollment</div>
+            <div class="progress-track"><div class="fill"></div></div>
+            <div style="font-size:12px;color:var(--mute)">2 of 4 steps done · about 3 minutes left</div>
+            <div class="steps">
+              <div class="step"><span class="sc done">✓</span> Health history</div>
+              <div class="step"><span class="sc done">✓</span> Symptom check</div>
+              <div class="step"><span class="sc now">3</span> <strong style="font-weight:600">Match with a provider</strong></div>
+              <div class="step todo-row"><span class="sc todo">4</span> Confirm &amp; start</div>
+            </div>
+            <a class="btn-primary" onclick="return false">Continue — resume at step 3</a>
+            <button class="link-soft" style="background:none;border:none;font-family:var(--sans);margin:12px auto 0;display:block" onclick="toggleDeflect()">Something stopped me</button>
+            <div class="deflect" id="deflect">
+              <div class="dq">No problem — what would help? We'll point you to the right place.</div>
+              <div class="dchips">
+                <button onclick="return false">I have cost questions</button>
+                <button onclick="return false">Not sure it's right for me</button>
+                <button onclick="return false">Need to ask a provider first</button>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="padding:16px 20px"><div style="font-size:13px;color:var(--mute)">Meanwhile in Virtual Clinic</div><div style="font-size:14px;font-weight:500;margin-top:6px">Book a one-time visit anytime →</div></div>
+        </div>
+        <div class="mob-nav">
+          <div class="tab on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h3m10-10v9a1 1 0 01-1 1h-3"/></svg>Home</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 7V3m8 4V3M5 11h14M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>Schedule</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4M4.3 4.3l2.8 2.8m9.8 9.8l2.8 2.8M1 12h4m14 0h4"/></svg>Explore</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg>Profile</div>
+        </div>
+      </div>
+      <div class="frame-meta">
+        <div class="seg">Segment 2 · Program dropoff</div>
+        <div class="frame-caption"><strong>Trust: endowed progress + addressing the blocker.</strong> Restores the exact step with answers retained; "Something stopped me" routes to the real obstacle instead of nagging. Highest-ROI segment — already-warm intent.</div>
+      </div>
+    </div>
+
+    <!-- ============ CONCEPT 7 · Alternative Care Finder ============ -->
+    <div class="frame-outer" id="p7">
+      <div class="frame-label">Concept 7 — Alternative Care Finder</div>
+      <div class="phone">
+        <div class="mob-status"><span>9:41</span><span class="icons"><svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="3" width="3" height="10" rx="1"/><rect x="5.5" y="5" width="3" height="8" rx="1"/><rect x="10" y="1" width="3" height="12" rx="1"/></svg></span></div>
+        <div class="mob-header"><h2 class="serif">Eligibility result</h2></div>
+        <div class="mob-scroll">
+          <div class="elig-banner">
+            <div class="ico"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="11" stroke="currentColor" stroke-width="1.6"/><path d="M13 7v7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="13" cy="18" r="1.1" fill="currentColor"/></svg></div>
+            <h3>GLP-1 Care isn't the right fit right now.</h3>
+            <p>Based on your health history, our clinicians determined GLP-1 medication isn't appropriate for you at this time. That's a clinical call made to keep you safe — not a rejection of you.</p>
+          </div>
+          <div class="divider" style="margin:18px 0"></div>
+          <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute-2);font-weight:600">What can still help</div>
+          <div class="card alt-card">
+            <div class="ai"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2v16M2 10h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+            <div><div class="at">Metabolic health visit</div><div class="ad">See a provider about sustainable, non-medication approaches to weight and energy.</div><a class="link-soft" style="margin-top:8px" onclick="return false">Book a visit</a></div>
+          </div>
+          <div class="card alt-card">
+            <div class="ai"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 16s1-5 6-5 6 5 6 5M10 8a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+            <div><div class="at">Nutrition &amp; coaching support</div><div class="ad">Work with a registered dietitian on a plan built around your body.</div><a class="link-soft" style="margin-top:8px" onclick="return false">Explore coaching</a></div>
+          </div>
+          <div class="card alt-card" style="border-color:var(--green-muted);background:var(--green-light)">
+            <div class="ai" style="background:#fff"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 17s-6-3.5-6-8a3.5 3.5 0 016-2.5A3.5 3.5 0 0116 9c0 4.5-6 8-6 8z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></div>
+            <div><div class="at">Hormone Care may be relevant</div><div class="ad">Some of your noted symptoms — fatigue, cycle changes — can point to hormones. Worth a look.</div><a class="link-soft" style="margin-top:8px" onclick="return false">Take the self-check</a></div>
+          </div>
+        </div>
+      </div>
+      <div class="frame-meta">
+        <div class="seg">Segment 3 · Program ineligible</div>
+        <div class="frame-caption"><strong>Trust: honesty + reciprocity.</strong> Leads with empathy and the clinical <em>why</em>; <strong>never</strong> re-pitches GLP-1. Routes to real alternatives (and the <em>other</em> program only when symptoms warrant). Conversion here = retention.</div>
+      </div>
+    </div>
+
+    <!-- ============ CONCEPT 8 · Companion Care Check ============ -->
+    <div class="frame-outer" id="p8">
+      <div class="frame-label">Concept 8 — Companion Care Check</div>
+      <div class="phone">
+        <div class="mob-status"><span>9:41</span><span class="icons"><svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="3" width="3" height="10" rx="1"/><rect x="5.5" y="5" width="3" height="8" rx="1"/><rect x="10" y="1" width="3" height="12" rx="1"/></svg></span></div>
+        <div class="mob-header"><h2 class="serif">Care plan</h2></div>
+        <div class="mob-scroll">
+          <div class="card" style="padding:14px 18px;display:flex;align-items:center;gap:10px">
+            <span class="pill pill-green">Active</span>
+            <div style="font-size:14px;font-weight:500">GLP-1 Care · Month 3</div>
+          </div>
+
+          <div class="card" id="ccFlow">
+            <div class="cc-q active" data-q="1">
+              <div class="companion-intro">
+                <div class="badge"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5l1.6 3.2 3.5.5L9.5 7.7l.6 3.5L7 9.5 3.9 11.2l.6-3.5L2 5.2l3.5-.5L7 1.5z" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/></svg> Part of comprehensive care</div>
+                <h3>A quick hormone check-in</h3>
+                <p>Weight and hormones are closely linked — especially for women over 40. Three questions to make sure nothing's being missed.</p>
+                <a class="btn-primary" style="margin-top:18px" onclick="ccNext(2)">Start check-in</a>
+              </div>
+            </div>
+            <div class="cc-q" data-q="2">
+              <div class="cc-prog"><span class="d on"></span><span class="d"></span></div>
+              <h3>Have you noticed night sweats or hot flashes?</h3>
+              <button class="opt" onclick="ccNext(3)">Yes, regularly</button>
+              <button class="opt" onclick="ccNext(3)">Occasionally</button>
+              <button class="opt" onclick="ccNext(3)">No</button>
+            </div>
+            <div class="cc-q" data-q="3">
+              <div class="cc-prog"><span class="d on"></span><span class="d on"></span></div>
+              <h3>Has your cycle become irregular in the last year?</h3>
+              <button class="opt" onclick="ccResult()">Yes</button>
+              <button class="opt" onclick="ccResult()">Somewhat</button>
+              <button class="opt" onclick="ccResult()">No</button>
+            </div>
+          </div>
+
+          <div class="card cc-result" id="ccResult">
+            <div class="badge" style="display:inline-flex;align-items:center;gap:6px;background:var(--green-light);color:var(--green);border-radius:var(--r-full);padding:6px 14px;font-size:12px;font-weight:500;margin-bottom:14px"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M12.5 4L6 10.5 2.5 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Worth a closer look</div>
+            <h3 style="font-family:var(--serif);font-size:21px;font-weight:400;line-height:1.3;margin-bottom:12px">These symptoms can intersect with weight management.</h3>
+            <p style="font-size:14px;color:#3A3D3A;line-height:1.6;margin-bottom:8px">Hormonal shifts can make weight harder to manage and affect sleep and energy — which in turn affect your GLP-1 progress. Treating both together often works better than either alone.</p>
+            <p style="font-size:13px;color:var(--mute);line-height:1.55;margin-bottom:18px">Your GLP-1 care team can coordinate with Hormone Care so it's one connected plan.</p>
+            <a class="btn-primary" onclick="return false">Explore Hormone Care</a>
+            <button class="link-soft" style="background:none;border:none;font-family:var(--sans);margin:12px auto 0;display:block" onclick="ccReset()">Retake check-in</button>
+          </div>
+        </div>
+        <div class="mob-nav">
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h3m10-10v9a1 1 0 01-1 1h-3"/></svg>Home</div>
+          <div class="tab on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3 8-8M5 12a7 7 0 1011 5.7"/></svg>Care plan</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Messages</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg>Profile</div>
+        </div>
+      </div>
+      <div class="frame-meta">
+        <div class="seg">Segments 4 &amp; 5 · Existing program member</div>
+        <div class="frame-caption"><strong>Trust: good medicine, not a second sale.</strong> The weight↔hormone link is real, so the adjacent program reads as thoroughness. Framed as a care-team-coordinated plan. Risk: cadence must be respectful (cost stacks).</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const segByPattern = {
+    1:"Segment 1 · Virtual Clinic member", 2:"Segment 1 · Virtual Clinic member",
+    3:"Segment 1 · Virtual Clinic member", 4:"Segment 1 · Virtual Clinic member",
+    5:"Segment 1 · Virtual Clinic member", 6:"Segment 2 · Program dropoff",
+    7:"Segment 3 · Program ineligible", 8:"Segments 4 & 5 · Existing program member"
+  };
+  function setSeg(p){ document.getElementById('segRow').innerHTML = '<span class="seg-tag">'+segByPattern[p]+'</span>'; }
+  document.querySelectorAll('#patNav button').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('#patNav button').forEach(b=>b.classList.remove('on'));
+      btn.classList.add('on');
+      document.querySelectorAll('.frame-outer').forEach(f=>f.classList.remove('active'));
+      document.getElementById('p'+btn.dataset.p).classList.add('active');
+      setSeg(btn.dataset.p);
+    });
+  });
+  setSeg(1);
+
+  // C3 goals
+  function pickGoal(el){
+    document.querySelectorAll('#p3 .goal-tile').forEach(t=>t.classList.remove('sel'));
+    el.classList.add('sel');
+    document.getElementById('goalGrid').style.display='none';
+    document.getElementById('goalIntro').style.display='none';
+    document.getElementById('goalResult').classList.add('active');
+    document.getElementById('goalChosen').textContent = el.dataset.label;
+  }
+  function resetGoal(){
+    document.getElementById('goalResult').classList.remove('active');
+    document.getElementById('goalGrid').style.display='grid';
+    document.getElementById('goalIntro').style.display='block';
+    document.querySelectorAll('#p3 .goal-tile').forEach(t=>t.classList.remove('sel'));
+  }
+
+  // C5 insight
+  function toggleInsight(){ document.getElementById('insightDetail').classList.toggle('open'); }
+
+  // C6 resume deflect
+  function toggleDeflect(){ document.getElementById('deflect').classList.toggle('open'); }
+
+  // C8 companion
+  function ccNext(n){
+    document.querySelectorAll('#p8 .cc-q').forEach(q=>q.classList.remove('active'));
+    document.querySelector('#p8 .cc-q[data-q="'+n+'"]').classList.add('active');
+  }
+  function ccResult(){
+    document.getElementById('ccFlow').style.display='none';
+    document.getElementById('ccResult').classList.add('active');
+  }
+  function ccReset(){
+    document.getElementById('ccResult').classList.remove('active');
+    document.getElementById('ccFlow').style.display='block';
+    document.querySelectorAll('#p8 .cc-q').forEach(q=>q.classList.remove('active'));
+    document.querySelector('#p8 .cc-q[data-q="1"]').classList.add('active');
+  }
+</script>
+</body>
+</html>
