@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Maven — Choose a GLP-1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,300..500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:#F3F1EB; --surface:#FFFFFF; --green:#0F4D3F; --green-dark:#0B3E33;
+    --ink:#1A1D1A; --mute:#6E7268; --strike:#A2A69C;
+    --seg-bg:#E8E5DE; --seg-line:#DED9CF;
+    --card-line:rgba(20,22,18,0.09); --line-soft:rgba(20,22,18,0.07);
+    --btn-soft:#ECE9E2;
+    --serif:"Fraunces",Georgia,serif; --sans:"Inter",system-ui,sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{background:#4A4A4A;}
+  body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 16px 64px;}
+
+  .qa-back{align-self:flex-start;font-size:13px;color:#C9C9C9;text-decoration:none;margin-bottom:24px;}
+  .qa-back:hover{color:#fff;}
+
+  /* device */
+  .device{
+    width:390px;height:844px;background:var(--bg);border-radius:44px;
+    position:relative;overflow:hidden;display:flex;flex-direction:column;
+    box-shadow:0 30px 90px rgba(0,0,0,0.35);
+  }
+  .notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:150px;height:32px;background:#000;border-radius:0 0 18px 18px;z-index:20;}
+
+  .statusbar{height:54px;flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:18px 30px 0;font-size:15px;font-weight:600;background:var(--surface);}
+  .statusbar .icons{display:flex;gap:6px;align-items:center;}
+  .statusbar .icons svg{display:block;}
+
+  /* nav + progress */
+  .navbar{background:var(--surface);flex-shrink:0;padding:6px 0 0;}
+  .navbar .title{text-align:center;font-size:16px;font-weight:400;color:var(--ink);padding-bottom:14px;}
+  .progress{height:2px;background:var(--seg-line);position:relative;}
+  .progress::after{content:"";position:absolute;left:0;top:0;height:2px;width:42%;background:var(--green);}
+
+  .scroll{flex:1;overflow-y:auto;background:var(--bg);display:flex;flex-direction:column;}
+  .scroll::-webkit-scrollbar{display:none;}
+  .pad{padding:0 24px;}
+
+  h1.headline{font-family:var(--serif);font-size:30px;line-height:1.1;font-weight:400;letter-spacing:-0.01em;margin:22px 0 8px;color:var(--ink);}
+  p.sub{font-size:15px;line-height:1.5;color:var(--mute);margin-bottom:20px;}
+
+  /* segmented controls */
+  .seg{display:flex;background:var(--seg-bg);border-radius:999px;padding:4px;margin-bottom:12px;}
+  .seg.two{margin-bottom:20px;}
+  .seg button{
+    flex:1;border:none;background:transparent;border-radius:999px;padding:11px 8px;
+    font-family:var(--sans);font-size:15px;font-weight:400;color:var(--mute);cursor:pointer;
+    transition:all .18s ease;white-space:nowrap;
+  }
+  .seg button.on{background:var(--surface);color:var(--ink);font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,0.10),0 1px 1px rgba(0,0,0,0.04);}
+  .seg.two button.on{color:var(--green);}
+
+  /* card rail */
+  .rail{display:flex;gap:14px;overflow-x:auto;padding:2px 24px 8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;}
+  .rail::-webkit-scrollbar{display:none;}
+  .med-card{
+    min-width:280px;width:280px;scroll-snap-align:start;background:var(--surface);
+    border:1.5px solid var(--card-line);border-radius:22px;padding:14px;display:flex;flex-direction:column;
+    transition:border-color .18s ease,box-shadow .18s ease;
+  }
+  .med-card.selected{border-color:var(--green);box-shadow:0 0 0 1px var(--green);}
+  .med-card.hidden{display:none;}
+
+  .media{position:relative;border-radius:14px;overflow:hidden;height:150px;
+    background:
+      radial-gradient(120% 80% at 78% 8%, #A9C4A0 0%, #C7D8BE 26%, rgba(199,216,190,0) 55%),
+      linear-gradient(180deg,#EDE7DC 0%,#E6DCCB 60%,#DDCFB8 100%);
+  }
+  .media .chip{position:absolute;top:10px;left:10px;background:var(--surface);border:1px solid var(--card-line);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:500;color:var(--ink);z-index:2;}
+  .media .pen{position:absolute;left:12%;right:20%;bottom:26px;height:26px;border-radius:20px;
+    background:linear-gradient(180deg,#FBFAF8 0%,#E7E4DD 100%);box-shadow:0 3px 8px rgba(0,0,0,0.18);transform:rotate(-3deg);}
+  .media .pen::after{content:"";position:absolute;right:-2px;top:3px;width:22px;height:20px;border-radius:6px;background:#6E5FA6;box-shadow:inset 0 -4px 0 rgba(0,0,0,0.12);}
+  .media .box{position:absolute;right:14px;bottom:22px;width:52px;height:64px;border-radius:5px;background:#F7F5F0;border:1px solid #DFD8CC;box-shadow:0 3px 8px rgba(0,0,0,0.12);}
+  .media .box::before{content:"";position:absolute;top:8px;left:8px;right:8px;height:8px;border-radius:2px;background:#1F7A57;}
+  .media .box::after{content:"";position:absolute;top:22px;left:8px;right:8px;bottom:8px;border:1px solid #E4B94A;border-radius:2px;}
+
+  .med-body{padding:0 6px;}
+  .med-name{font-family:var(--serif);font-size:23px;font-weight:400;text-align:center;margin-top:16px;color:var(--ink);}
+  .med-generic{font-size:14px;color:var(--mute);text-align:center;margin-top:2px;}
+
+  /* overview price */
+  .price-block{text-align:center;margin:16px 0 14px;}
+  .price-main{font-size:19px;color:var(--ink);}
+  .price-main .from{font-family:var(--serif);font-style:italic;font-weight:400;}
+  .price-sub{font-size:13px;color:var(--mute);margin-top:3px;}
+
+  /* 3-month table */
+  .price-table{margin:14px 0 12px;}
+  .price-row{display:flex;justify-content:space-between;align-items:center;padding:13px 4px;border-top:1px solid var(--line-soft);font-size:14px;}
+  .price-row:first-child{border-top:none;}
+  .price-row .m{color:var(--ink);}
+  .price-row .v{color:var(--ink);font-weight:400;}
+  .price-row .v .old{color:var(--strike);text-decoration:line-through;margin-right:6px;}
+
+  .med-cta{width:100%;border:none;border-radius:999px;padding:14px;font-family:var(--sans);font-size:15px;font-weight:500;cursor:pointer;margin-top:6px;transition:all .18s ease;}
+  .med-cta.soft{background:var(--btn-soft);color:var(--ink);}
+  .med-cta.soft:hover{background:#E4E0D8;}
+  .med-cta.done{background:var(--green);color:#fff;}
+
+  .footer{padding:16px 24px 28px;background:var(--bg);flex-shrink:0;}
+  .foot-btn{width:100%;border-radius:999px;padding:16px;font-family:var(--sans);font-size:16px;font-weight:500;cursor:pointer;transition:all .18s ease;text-align:center;}
+  .foot-btn.ghost{background:transparent;border:1.5px solid var(--green);color:var(--green);}
+  .foot-btn.ghost:hover{background:rgba(15,77,63,0.05);}
+  .foot-btn.filled{background:var(--green);border:1.5px solid var(--green);color:#fff;}
+  .foot-btn.filled:hover{background:var(--green-dark);}
+
+  .caption{max-width:390px;margin-top:20px;text-align:center;font-size:12.5px;color:#BFBFBF;line-height:1.6;}
+  .caption strong{color:#E8E8E8;}
+</style>
+</head>
+<body>
+  <a href="../../" class="qa-back">← All prototypes</a>
+
+  <div class="device">
+    <div class="notch"></div>
+    <div class="statusbar">
+      <span>9:41</span>
+      <span class="icons">
+        <svg width="18" height="12" viewBox="0 0 18 12" fill="#000"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4.5" width="3" height="7.5" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+        <svg width="17" height="12" viewBox="0 0 17 12" fill="none"><path d="M8.5 2.5c2.3 0 4.4.9 6 2.3M8.5 6c1.4 0 2.7.5 3.6 1.4M8.5 2.5C6.2 2.5 4 3.4 2.5 4.8M8.5 6C7.1 6 5.8 6.5 4.9 7.4" stroke="#000" stroke-width="1.4" stroke-linecap="round"/><circle cx="8.5" cy="10" r="1.1" fill="#000"/></svg>
+        <svg width="26" height="13" viewBox="0 0 26 13" fill="none"><rect x="1" y="1" width="21" height="11" rx="3" stroke="#000" stroke-opacity="0.4" stroke-width="1"/><rect x="2.5" y="2.5" width="18" height="8" rx="1.5" fill="#000"/><rect x="23.5" y="4.5" width="1.5" height="4" rx="0.75" fill="#000" fill-opacity="0.4"/></svg>
+      </span>
+    </div>
+    <div class="navbar">
+      <div class="title">Your goals</div>
+      <div class="progress"></div>
+    </div>
+
+    <div class="scroll">
+      <div class="pad">
+        <h1 class="headline">Do you have a GLP-1 in mind?</h1>
+        <p class="sub">Your clinician will review your health history and preferences before prescribing.</p>
+
+        <div class="seg" id="typeSeg">
+          <button class="on" data-type="all">All types</button>
+          <button data-type="pill">Pill</button>
+          <button data-type="injection">Injection</button>
+        </div>
+        <div class="seg two" id="viewSeg">
+          <button class="on" data-view="overview">Overview</button>
+          <button data-view="pricing">3-month pricing</button>
+        </div>
+      </div>
+
+      <div class="rail" id="rail"></div>
+    </div>
+
+    <div class="footer">
+      <button class="foot-btn ghost" id="footBtn">I'd like a clinician to guide me</button>
+    </div>
+  </div>
+
+  <div class="caption">
+    <strong>Built from QA screenshots.</strong> Interactions: type filter (All / Pill / Injection) · view toggle (Overview ↔ 3-month pricing) · tap Select to choose a medication → card highlights, button becomes “Selected”, and the footer switches to “Continue with …”.
+  </div>
+
+<script>
+  const MEDS = [
+    { id:"zep-pen", name:"Zepbound KwikPen", generic:"Tirzepatide", form:"Weekly injection", type:"injection",
+      priceFrom:"$149/mo", insurance:"or $25/mo with insurance",
+      months:[["Month 1","$200","$149"],["Month 2","$200","$149"],["Month 3","","From $249"]] },
+    { id:"zep-vial", name:"Zepbound vial", generic:"Tirzepatide", form:"Weekly injection", type:"injection",
+      priceFrom:"$149/mo", insurance:"or $25/mo with insurance",
+      months:[["Month 1","$200","$149"],["Month 2","$200","$149"],["Month 3","","From $249"]] },
+    { id:"wegovy", name:"Wegovy", generic:"Semaglutide", form:"Weekly injection", type:"injection",
+      priceFrom:"$199/mo", insurance:"or $25/mo with insurance",
+      months:[["Month 1","$260","$199"],["Month 2","$260","$199"],["Month 3","","From $299"]] },
+    { id:"rybelsus", name:"Rybelsus", generic:"Semaglutide", form:"Daily pill", type:"pill",
+      priceFrom:"$99/mo", insurance:"or $15/mo with insurance",
+      months:[["Month 1","$140","$99"],["Month 2","$140","$99"],["Month 3","","From $169"]] },
+  ];
+
+  let state = { type:"all", view:"overview", selected:null };
+
+  function mediaSVG() {
+    return '<div class="chip">FORM</div><div class="pen"></div><div class="box"></div>';
+  }
+
+  function renderCards() {
+    const rail = document.getElementById("rail");
+    rail.innerHTML = "";
+    MEDS.filter(m => state.type === "all" || m.type === state.type).forEach(m => {
+      const card = document.createElement("div");
+      card.className = "med-card" + (state.selected === m.id ? " selected" : "");
+      let body;
+      if (state.view === "overview") {
+        body = `<div class="price-block">
+            <div class="price-main"><span class="from">from</span> ${m.priceFrom}</div>
+            <div class="price-sub">${m.insurance}</div>
+          </div>`;
+      } else {
+        body = `<div class="price-table">` + m.months.map(([mo,old,val]) =>
+          `<div class="price-row"><span class="m">${mo}</span><span class="v">${old?`<span class="old">${old}</span>`:""}${val}</span></div>`
+        ).join("") + `</div>`;
+      }
+      const isSel = state.selected === m.id;
+      card.innerHTML = `
+        <div class="media">
+          <div class="chip">${m.form}</div>
+          <div class="pen"></div>
+          <div class="box"></div>
+        </div>
+        <div class="med-body">
+          <div class="med-name">${m.name}</div>
+          <div class="med-generic">(${m.generic})</div>
+          ${body}
+          <button class="med-cta ${isSel ? "done" : "soft"}" data-id="${m.id}">${isSel ? "Selected" : "Select"}</button>
+        </div>`;
+      card.querySelector(".med-cta").addEventListener("click", () => {
+        state.selected = (state.selected === m.id) ? null : m.id;
+        renderCards();
+        renderFooter();
+      });
+      rail.appendChild(card);
+    });
+  }
+
+  function renderFooter() {
+    const btn = document.getElementById("footBtn");
+    if (state.selected) {
+      const m = MEDS.find(x => x.id === state.selected);
+      btn.className = "foot-btn filled";
+      btn.textContent = "Continue with " + m.name;
+    } else {
+      btn.className = "foot-btn ghost";
+      btn.textContent = "I'd like a clinician to guide me";
+    }
+  }
+
+  document.getElementById("typeSeg").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    state.type = b.dataset.type;
+    document.querySelectorAll("#typeSeg button").forEach(x => x.classList.remove("on"));
+    b.classList.add("on");
+    // keep selection only if still visible
+    if (state.selected) {
+      const sel = MEDS.find(x => x.id === state.selected);
+      if (state.type !== "all" && sel.type !== state.type) { state.selected = null; renderFooter(); }
+    }
+    renderCards();
+  });
+  document.getElementById("viewSeg").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    state.view = b.dataset.view;
+    document.querySelectorAll("#viewSeg button").forEach(x => x.classList.remove("on"));
+    b.classList.add("on");
+    renderCards();
+  });
+
+  renderCards();
+  renderFooter();
+</script>
+</body>
+</html>
