@@ -43,6 +43,7 @@
 
   .scroll{flex:1;overflow-y:auto;background:var(--bg);display:flex;flex-direction:column;}
   .scroll::-webkit-scrollbar{display:none;}
+  .scroll>*{flex-shrink:0;} /* children keep natural height; overflow scrolls instead of squashing cards */
   .pad{padding:0 24px;}
 
   h1.headline{font-family:var(--serif);font-size:25px;line-height:1.15;font-weight:400;letter-spacing:-0.01em;margin:22px 0 8px;color:var(--ink);white-space:nowrap;}
@@ -60,7 +61,7 @@
   .seg.two button.on{color:var(--green);}
 
   /* card rail — cards size to their content; rail scrolls x, page scrolls y */
-  .rail{display:flex;gap:14px;overflow-x:auto;padding:2px 24px 8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;align-items:stretch;}
+  .rail{display:flex;gap:14px;overflow-x:auto;padding:2px 16px 8px;scroll-padding-left:16px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;align-items:stretch;}
   .rail::-webkit-scrollbar{display:none;}
   .med-card{
     min-width:280px;width:280px;scroll-snap-align:start;background:var(--surface);
