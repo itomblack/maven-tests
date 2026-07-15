@@ -103,11 +103,15 @@ export const font = {
     subheadlineSm:  "22px",
     subheadlineLg:  "24px",
     headlineLg:     "34px",
+    headlineXlg:    "40px",
+    displaySm:      "46px",
+    displayLg:      "63px",
   },
   tracking: {
     headline:  "0",
     numerical: "0",
     overline:  "1px",
+    ivar:      "0.25px",
   },
   weight: {
     regular: 400,
@@ -204,6 +208,27 @@ export const typography = {
     fontWeight: font.weight.regular,
     lineHeight: 1.2,
     letterSpacing: "0",
+  },
+  headlineEmphasisXlg: {
+    fontFamily: font.family.emphasis,
+    fontSize: font.size.headlineXlg,
+    fontWeight: font.weight.regular,
+    lineHeight: 1.1,
+    letterSpacing: font.tracking.ivar,
+  },
+  displayEmphasisSm: {
+    fontFamily: font.family.emphasis,
+    fontSize: font.size.displaySm,
+    fontWeight: font.weight.regular,
+    lineHeight: 1.1,
+    letterSpacing: font.tracking.ivar,
+  },
+  displayEmphasisLg: {
+    fontFamily: font.family.emphasis,
+    fontSize: font.size.displayLg,
+    fontWeight: font.weight.regular,
+    lineHeight: 1.1,
+    letterSpacing: font.tracking.ivar,
   },
 } as const;
 

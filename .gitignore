@@ -1,0 +1,7 @@
+# Dependencies & caches (build output like prototypes/*/dist is intentionally kept)
+node_modules/
+.npm-cache/
+
+# Local tooling
+.codex/
+.DS_Store

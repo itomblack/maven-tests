@@ -1,0 +1,841 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Maven — Mobile Program Enrollment Concepts</title>
+    <link rel="stylesheet" href="../../design-system/tokens.css" />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: var(--space-0);
+        padding: var(--space-0);
+      }
+
+      body {
+        min-height: 100vh;
+        background: var(--color-surface-secondary);
+        color: var(--color-text-primary);
+      }
+
+      button {
+        font: inherit;
+      }
+
+      a {
+        color: var(--color-text-link-primary);
+      }
+
+      .page {
+        min-height: 100vh;
+        display: grid;
+        gap: var(--space-16);
+        align-content: start;
+      }
+
+      .topbar {
+        background: var(--color-surface-primary);
+        border-bottom: 1px solid var(--color-border-disabled);
+      }
+
+      .topbar-inner,
+      .viewer {
+        width: min(100%, 126ch);
+        margin: var(--space-0) auto;
+        padding: var(--space-16);
+      }
+
+      .topbar-inner {
+        display: grid;
+        gap: var(--space-12);
+      }
+
+      .breadcrumb {
+        width: fit-content;
+        text-decoration: none;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      p {
+        margin: var(--space-0);
+      }
+
+      .intro {
+        display: grid;
+        gap: var(--space-4);
+      }
+
+      .intro p,
+      .muted {
+        color: var(--color-text-secondary);
+      }
+
+      .viewer {
+        display: grid;
+        gap: var(--space-16);
+      }
+
+      .concept-tabs {
+        display: flex;
+        gap: var(--space-8);
+        overflow-x: auto;
+        padding-bottom: var(--space-4);
+        scrollbar-width: none;
+      }
+
+      .concept-tabs::-webkit-scrollbar {
+        display: none;
+      }
+
+      .tab-button {
+        flex: 0 0 auto;
+        border: 1px solid var(--color-border-disabled);
+        border-radius: var(--radius-full);
+        background: var(--color-surface-primary);
+        color: var(--color-text-primary);
+        padding: var(--space-8) var(--space-12);
+        cursor: pointer;
+      }
+
+      .tab-button[aria-current="true"] {
+        border-color: var(--color-border-brand);
+        background: var(--color-maven-100);
+        color: var(--color-maven-800);
+      }
+
+      .stage {
+        display: grid;
+        gap: var(--space-16);
+      }
+
+      .stage-header {
+        display: grid;
+        gap: var(--space-12);
+        background: var(--color-surface-primary);
+        border: 1px solid var(--color-border-disabled);
+        border-radius: var(--radius-lg);
+        padding: var(--space-16);
+      }
+
+      .stage-title {
+        display: grid;
+        gap: var(--space-8);
+      }
+
+      .stage-meta,
+      .chip-row,
+      .action-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-8);
+        align-items: center;
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        width: fit-content;
+        border-radius: var(--radius-full);
+        padding: var(--space-4) var(--space-8);
+        background: var(--color-coconut-100);
+        color: var(--color-text-secondary);
+      }
+
+      .chip.brand {
+        background: var(--color-maven-100);
+        color: var(--color-maven-800);
+      }
+
+      .chip.attention {
+        background: var(--color-fill-attention-secondary);
+        color: var(--color-text-attention);
+      }
+
+      .chip.success {
+        background: var(--color-fill-success-secondary);
+        color: var(--color-icon-success);
+      }
+
+      .prototype-zone {
+        display: grid;
+        gap: var(--space-16);
+        justify-items: center;
+      }
+
+      .phone {
+        width: min(100%, 25rem);
+        background: var(--color-neutral-60);
+        border-radius: var(--radius-lg);
+        padding: var(--space-12);
+        box-shadow: var(--elevation-overlay);
+      }
+
+      .phone-screen {
+        min-height: 46rem;
+        background: var(--color-surface-secondary);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+      }
+
+      .phone-status,
+      .phone-nav {
+        background: var(--color-surface-primary);
+      }
+
+      .phone-status {
+        padding: var(--space-12) var(--space-16);
+        display: flex;
+        justify-content: space-between;
+        gap: var(--space-12);
+        align-items: center;
+      }
+
+      .phone-brand {
+        font-family: var(--font-family-emphasis);
+        letter-spacing: var(--font-tracking-ivar);
+      }
+
+      .phone-content {
+        padding: var(--space-16);
+        display: grid;
+        gap: var(--space-12);
+        align-content: start;
+      }
+
+      .phone-nav {
+        border-top: 1px solid var(--color-border-disabled);
+        padding: var(--space-12);
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: var(--space-8);
+      }
+
+      .nav-item {
+        display: grid;
+        gap: var(--space-4);
+        justify-items: center;
+        color: var(--color-text-secondary);
+      }
+
+      .nav-dot {
+        width: var(--space-8);
+        height: var(--space-8);
+        border-radius: var(--radius-full);
+        background: var(--color-gray-500);
+      }
+
+      .nav-item.active {
+        color: var(--color-maven-800);
+      }
+
+      .nav-item.active .nav-dot {
+        background: var(--color-maven-800);
+      }
+
+      .card,
+      .hero-card,
+      .task-card,
+      .choice-card,
+      .message,
+      .step-card,
+      .mini-card {
+        background: var(--color-surface-primary);
+        border: 1px solid var(--color-border-disabled);
+        border-radius: var(--radius-md);
+        padding: var(--space-16);
+        display: grid;
+        gap: var(--space-12);
+      }
+
+      .hero-card {
+        background: var(--color-maven-25);
+        border-color: var(--color-border-brand);
+      }
+
+      .task-card.highlight,
+      .choice-card.selected,
+      .step-card.active,
+      .message.clinical {
+        background: var(--color-maven-25);
+        border-color: var(--color-border-brand);
+      }
+
+      .message.member {
+        margin-left: var(--space-24);
+        background: var(--color-fill-attention-secondary);
+      }
+
+      .card-row,
+      .task-row,
+      .profile-row,
+      .metric-row {
+        display: flex;
+        gap: var(--space-12);
+        justify-content: space-between;
+        align-items: start;
+      }
+
+      .profile-row {
+        justify-content: start;
+        align-items: center;
+      }
+
+      .avatar,
+      .provider-photo {
+        flex: 0 0 auto;
+        border-radius: var(--radius-full);
+        border: 1px solid var(--color-border-disabled);
+        background:
+          linear-gradient(var(--color-surface-overlay-light), var(--color-surface-overlay-light)),
+          var(--color-maven-300);
+      }
+
+      .avatar {
+        width: var(--space-24);
+        height: var(--space-24);
+      }
+
+      .provider-photo {
+        width: 4rem;
+        height: 4rem;
+      }
+
+      .primary-action,
+      .secondary-action,
+      .quiet-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: fit-content;
+        border-radius: var(--radius-full);
+        padding: var(--space-8) var(--space-16);
+        border: 1px solid var(--color-border-disabled);
+        background: var(--color-surface-primary);
+        color: var(--color-text-primary);
+      }
+
+      .primary-action {
+        background: var(--color-fill-button-primary);
+        border-color: var(--color-border-brand);
+        color: var(--color-text-primary-inverse);
+      }
+
+      .secondary-action {
+        color: var(--color-text-button-secondary);
+      }
+
+      .quiet-action {
+        color: var(--color-text-secondary);
+      }
+
+      .stack {
+        display: grid;
+        gap: var(--space-12);
+      }
+
+      .tight-stack {
+        display: grid;
+        gap: var(--space-8);
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-8);
+      }
+
+      .line {
+        height: var(--space-8);
+        border-radius: var(--radius-full);
+        background: var(--color-gray-300);
+      }
+
+      .line.short {
+        width: 64%;
+      }
+
+      .line.tiny {
+        width: 42%;
+      }
+
+      .progress-track {
+        height: var(--space-8);
+        border-radius: var(--radius-full);
+        background: var(--color-gray-300);
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        width: 64%;
+        height: 100%;
+        border-radius: var(--radius-full);
+        background: var(--color-maven-500);
+      }
+
+      .progress-fill.short {
+        width: 38%;
+      }
+
+      .timeline {
+        display: grid;
+        gap: var(--space-8);
+      }
+
+      .date-pill {
+        min-width: 4rem;
+        text-align: center;
+        border-radius: var(--radius-sm);
+        padding: var(--space-8);
+        background: var(--color-coconut-100);
+      }
+
+      .flow-notes {
+        display: grid;
+        gap: var(--space-8);
+        width: min(100%, 25rem);
+      }
+
+      .flow-step {
+        display: flex;
+        align-items: center;
+        gap: var(--space-8);
+        background: var(--color-surface-primary);
+        border: 1px solid var(--color-border-disabled);
+        border-radius: var(--radius-md);
+        padding: var(--space-12);
+      }
+
+      @media (min-width: 58rem) {
+        .topbar-inner {
+          padding: var(--space-20) var(--space-24);
+          grid-template-columns: minmax(0, 1fr) auto;
+          align-items: end;
+        }
+
+        .viewer {
+          padding: var(--space-24);
+          grid-template-columns: minmax(22ch, 29ch) minmax(0, 1fr);
+          align-items: start;
+        }
+
+        .concept-tabs {
+          display: grid;
+          gap: var(--space-8);
+          overflow: visible;
+          position: sticky;
+          top: var(--space-24);
+          padding-bottom: var(--space-0);
+        }
+
+        .tab-button {
+          width: 100%;
+          border-radius: var(--radius-md);
+          text-align: left;
+          white-space: normal;
+        }
+
+        .stage {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .stage-header {
+          grid-template-columns: minmax(0, 1fr) auto;
+          align-items: start;
+        }
+
+        .prototype-zone {
+          grid-template-columns: minmax(0, 1fr) minmax(18ch, 26ch);
+          align-items: start;
+          justify-items: center;
+        }
+
+        .flow-notes {
+          width: 100%;
+          position: sticky;
+          top: var(--space-24);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header class="topbar">
+        <div class="topbar-inner">
+          <div class="intro">
+            <a class="breadcrumb ds-interactive-small" href="../../">← All prototypes</a>
+            <h1 class="ds-headline-emphasis-lg">Mobile-first program enrollment concepts</h1>
+            <p class="ds-body-small">
+              Eight high-definition mobile product ideas for moving Virtual Clinic members toward GLP-1 Care and Hormone Care without advertising patterns.
+            </p>
+          </div>
+          <div class="chip-row" aria-label="Prototype scope">
+            <span class="chip brand ds-overline">Mobile first</span>
+            <span class="chip ds-body-supportive">Care guidance</span>
+            <span class="chip ds-body-supportive">8 concepts</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="viewer">
+        <nav class="concept-tabs" id="conceptTabs" aria-label="Mobile concept tabs"></nav>
+        <section class="stage">
+          <article class="stage-header" id="stageHeader"></article>
+          <div class="prototype-zone">
+            <div class="phone" id="phone"></div>
+            <div class="flow-notes" id="flowNotes"></div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script>
+      const concepts = [
+        {
+          id: "compass",
+          name: "Care Compass",
+          surface: "Home",
+          segment: "Virtual Clinic member",
+          moment: "A personalized home card appears after a member browses menopause or weight-related care.",
+          action: "It explains why Maven thinks a program could be relevant, then lets the member check fit, ask a clinician, or dismiss it.",
+          cta: "Check fit",
+          nav: "Home",
+          flow: ["Care signal", "Fit reason", "Program preview", "Eligibility check"],
+        },
+        {
+          id: "levels",
+          name: "Support Level Picker",
+          surface: "Appointment flow",
+          segment: "New or returning member",
+          moment: "The member searches for help and chooses the level of support before selecting a provider.",
+          action: "One-time visits and programs are framed as different care levels, not upgrades.",
+          cta: "Choose support",
+          nav: "Book",
+          flow: ["Search need", "Choose level", "Keep context", "Start path"],
+        },
+        {
+          id: "provider",
+          name: "Provider Care Plan",
+          surface: "Post-appointment",
+          segment: "Virtual Clinic member",
+          moment: "A trusted provider adds Hormone Care or GLP-1 Care to the post-visit plan.",
+          action: "The program feels like clinical continuation because it is attached to the visit summary.",
+          cta: "Continue plan",
+          nav: "Care",
+          flow: ["Visit complete", "Provider note", "Member question", "Program start"],
+        },
+        {
+          id: "journey",
+          name: "Care Journey Map",
+          surface: "Care plan",
+          segment: "Program dropoff",
+          moment: "A returning member sees exactly where they left off in the journey.",
+          action: "Progression makes enrollment feel like completing a care path rather than restarting a funnel.",
+          cta: "Resume",
+          nav: "Care",
+          flow: ["Explore", "Assess", "Begin", "Ongoing care"],
+        },
+        {
+          id: "goals",
+          name: "Health Goal Studio",
+          surface: "Home",
+          segment: "Unknown interest",
+          moment: "The member starts with a goal, not a program name.",
+          action: "Maven creates a suggested care mix across Virtual Clinic visits and structured programs.",
+          cta: "Build care mix",
+          nav: "Home",
+          flow: ["Pick goals", "Answer fit prompts", "See care mix", "Start step one"],
+        },
+        {
+          id: "resume",
+          name: "Enrollment Resume",
+          surface: "Home",
+          segment: "Program dropoff",
+          moment: "A member who abandoned onboarding gets a compact resume module.",
+          action: "It shows saved progress, next step, and a softer review option.",
+          cta: "Resume enrollment",
+          nav: "Home",
+          flow: ["Recognize dropoff", "Show progress", "Review", "Complete"],
+        },
+        {
+          id: "alternative",
+          name: "Alternative Support",
+          surface: "Care plan",
+          segment: "Program ineligible",
+          moment: "A member is not eligible for the program they tried to join.",
+          action: "The app stops recommending that same program and routes to useful alternate support.",
+          cta: "Book support",
+          nav: "Care",
+          flow: ["Result", "Suppress program", "Alternate plan", "Follow-up"],
+        },
+        {
+          id: "adjacent",
+          name: "Adjacent Care Check-In",
+          surface: "Messaging",
+          segment: "Existing program member",
+          moment: "A milestone check-in reveals symptoms that may fit the adjacent program.",
+          action: "The care team reviews fit before any new enrollment is offered.",
+          cta: "Ask care team",
+          nav: "Messages",
+          flow: ["Milestone", "Symptom signal", "Team review", "Fit check"],
+        },
+      ];
+
+      let activeId = concepts[0].id;
+      const conceptTabs = document.getElementById("conceptTabs");
+      const stageHeader = document.getElementById("stageHeader");
+      const phone = document.getElementById("phone");
+      const flowNotes = document.getElementById("flowNotes");
+
+      function render() {
+        const concept = concepts.find((item) => item.id === activeId) || concepts[0];
+        renderTabs();
+        stageHeader.innerHTML = `
+          <div class="stage-title">
+            <div class="stage-meta">
+              <span class="chip brand ds-overline">${concept.surface}</span>
+              <span class="chip ds-body-supportive">${concept.segment}</span>
+            </div>
+            <h2 class="ds-headline-emphasis-sm">${concept.name}</h2>
+            <p class="ds-body-default">${concept.moment}</p>
+            <p class="ds-body-small muted">${concept.action}</p>
+          </div>
+          <div class="action-row">
+            <span class="secondary-action ds-interactive-small">Save</span>
+            <span class="primary-action ds-interactive-small">${concept.cta}</span>
+          </div>
+        `;
+        phone.innerHTML = phoneShell(concept);
+        flowNotes.innerHTML = concept.flow
+          .map(
+            (step, index) => `
+              <div class="flow-step">
+                <span class="chip ${index === 0 ? "brand" : ""} ds-body-supportive">${index + 1}</span>
+                <p class="ds-body-small">${step}</p>
+              </div>
+            `
+          )
+          .join("");
+      }
+
+      function renderTabs() {
+        conceptTabs.innerHTML = concepts
+          .map(
+            (concept, index) => `
+              <button class="tab-button ds-interactive-small" type="button" data-id="${concept.id}" aria-current="${concept.id === activeId}">
+                ${index + 1}. ${concept.name}
+              </button>
+            `
+          )
+          .join("");
+
+        conceptTabs.querySelectorAll("[data-id]").forEach((button) => {
+          button.addEventListener("click", () => {
+            activeId = button.dataset.id;
+            render();
+          });
+        });
+      }
+
+      function phoneShell(concept) {
+        return `
+          <div class="phone-screen">
+            <div class="phone-status">
+              <div class="profile-row">
+                <span class="avatar" aria-hidden="true"></span>
+                <div>
+                  <p class="phone-brand ds-headline-emphasis-xs">Maven</p>
+                  <p class="ds-body-supportive muted">Good morning, Maya</p>
+                </div>
+              </div>
+              <span class="chip attention ds-body-supportive">${concept.surface}</span>
+            </div>
+            <div class="phone-content">
+              ${screenContent(concept.id)}
+            </div>
+            <div class="phone-nav">
+              ${["Home", "Book", "Care", "Messages"].map((item) => `
+                <div class="nav-item ${item === concept.nav ? "active" : ""}">
+                  <span class="nav-dot" aria-hidden="true"></span>
+                  <span class="ds-body-supportive">${item}</span>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      }
+
+      function screenContent(id) {
+        const screens = {
+          compass: `
+            <section class="hero-card">
+              <span class="chip brand ds-overline">Recommended for your care journey</span>
+              <h3 class="ds-headline-emphasis-sm">Hormone Care may be a better next step</h3>
+              <p class="ds-body-small muted">Based on symptoms from your recent visit and the providers you viewed.</p>
+              <div class="grid-2">
+                <div class="mini-card"><p class="ds-body-small">Sleep disruption</p><div class="line short"></div></div>
+                <div class="mini-card"><p class="ds-body-small">Hot flashes</p><div class="line tiny"></div></div>
+              </div>
+              <div class="action-row">
+                <span class="primary-action ds-interactive-small">Check fit</span>
+                <span class="quiet-action ds-interactive-small">Not now</span>
+              </div>
+            </section>
+            <section class="card">
+              <p class="ds-overline muted">Upcoming visit</p>
+              <div class="card-row">
+                <div class="profile-row">
+                  <span class="provider-photo" aria-hidden="true"></span>
+                  <div>
+                    <h4 class="ds-subheadline-xs">Menopause specialist</h4>
+                    <p class="ds-body-supportive muted">Friday, Jun 12</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          `,
+          levels: `
+            <section class="card">
+              <p class="ds-overline muted">Book care</p>
+              <h3 class="ds-headline-emphasis-sm">What level of support do you need?</h3>
+              <p class="ds-body-small muted">Choose a path before you pick a provider.</p>
+            </section>
+            <section class="stack">
+              <div class="choice-card">
+                <span class="chip ds-body-supportive">One-time support</span>
+                <h4 class="ds-subheadline-xs">Book a Virtual Clinic visit</h4>
+                <p class="ds-body-small muted">Best for a focused question.</p>
+              </div>
+              <div class="choice-card selected">
+                <span class="chip brand ds-body-supportive">Guided assessment</span>
+                <h4 class="ds-subheadline-xs">Find my care path</h4>
+                <p class="ds-body-small muted">Maven recommends a visit, program, or both.</p>
+                <span class="primary-action ds-interactive-small">Start</span>
+              </div>
+              <div class="choice-card">
+                <span class="chip ds-body-supportive">Ongoing care</span>
+                <h4 class="ds-subheadline-xs">Explore GLP-1 Care</h4>
+                <p class="ds-body-small muted">Structured treatment and support.</p>
+              </div>
+            </section>
+          `,
+          provider: `
+            <section class="hero-card">
+              <div class="profile-row">
+                <span class="provider-photo" aria-hidden="true"></span>
+                <div>
+                  <span class="chip brand ds-overline">Provider note</span>
+                  <h3 class="ds-headline-emphasis-sm">Dr. Patel recommends Hormone Care</h3>
+                </div>
+              </div>
+              <p class="ds-body-small">"Because these symptoms are recurring, ongoing support may be more useful than visit-by-visit care."</p>
+              <div class="action-row">
+                <span class="primary-action ds-interactive-small">Continue plan</span>
+                <span class="secondary-action ds-interactive-small">Message</span>
+              </div>
+            </section>
+            <section class="card">
+              <p class="ds-overline muted">Visit summary</p>
+              <div class="line"></div>
+              <div class="line short"></div>
+              <div class="line tiny"></div>
+            </section>
+          `,
+          journey: `
+            <section class="hero-card">
+              <span class="chip brand ds-overline">Your weight care journey</span>
+              <h3 class="ds-headline-emphasis-sm">You are midway through assessment</h3>
+              <p class="ds-body-small muted">Your Virtual Clinic intake is saved.</p>
+              <div class="progress-track"><div class="progress-fill"></div></div>
+              <span class="primary-action ds-interactive-small">Resume assessment</span>
+            </section>
+            <section class="timeline">
+              <div class="step-card"><span class="chip success ds-body-supportive">Done</span><h4 class="ds-subheadline-xs">Explore</h4></div>
+              <div class="step-card active"><span class="chip brand ds-body-supportive">Current</span><h4 class="ds-subheadline-xs">Assess</h4></div>
+              <div class="step-card"><span class="chip ds-body-supportive">Next</span><h4 class="ds-subheadline-xs">Begin treatment</h4></div>
+              <div class="step-card"><span class="chip ds-body-supportive">Later</span><h4 class="ds-subheadline-xs">Ongoing care</h4></div>
+            </section>
+          `,
+          goals: `
+            <section class="card">
+              <p class="ds-overline muted">Goal Studio</p>
+              <h3 class="ds-headline-emphasis-sm">What would you like care to help you change?</h3>
+            </section>
+            <section class="grid-2">
+              <div class="choice-card selected"><h4 class="ds-subheadline-xs">Lose weight</h4><p class="ds-body-supportive muted">Treatment options</p></div>
+              <div class="choice-card"><h4 class="ds-subheadline-xs">Improve energy</h4><p class="ds-body-supportive muted">Sleep and stress</p></div>
+              <div class="choice-card selected"><h4 class="ds-subheadline-xs">Manage menopause</h4><p class="ds-body-supportive muted">Symptoms and hormones</p></div>
+              <div class="choice-card"><h4 class="ds-subheadline-xs">Metabolic health</h4><p class="ds-body-supportive muted">Risk and labs</p></div>
+            </section>
+            <section class="hero-card">
+              <span class="chip brand ds-overline">Suggested care mix</span>
+              <h4 class="ds-subheadline-xs">GLP-1 assessment + Hormone specialist visit</h4>
+              <span class="primary-action ds-interactive-small">Build care mix</span>
+            </section>
+          `,
+          resume: `
+            <section class="hero-card">
+              <span class="chip brand ds-overline">Continue where you left off</span>
+              <h3 class="ds-headline-emphasis-sm">Hormone Care enrollment</h3>
+              <p class="ds-body-small muted">Two steps left. Your symptoms and goals are saved.</p>
+              <div class="progress-track"><div class="progress-fill short"></div></div>
+              <span class="primary-action ds-interactive-small">Resume enrollment</span>
+            </section>
+            <section class="stack">
+              <div class="task-card"><div class="task-row"><p class="ds-body-small">Completed intake</p><span class="chip success ds-body-supportive">Done</span></div></div>
+              <div class="task-card highlight"><div class="task-row"><p class="ds-body-small">Choose first visit</p><span class="chip brand ds-body-supportive">Next</span></div></div>
+              <div class="task-card"><div class="task-row"><p class="ds-body-small">Confirm plan</p><span class="chip ds-body-supportive">Later</span></div></div>
+            </section>
+          `,
+          alternative: `
+            <section class="card">
+              <span class="chip attention ds-overline">Eligibility result</span>
+              <h3 class="ds-headline-emphasis-sm">GLP-1 Care is not the right fit right now</h3>
+              <p class="ds-body-small muted">Maven will not keep recommending the same program unless your eligibility context changes.</p>
+            </section>
+            <section class="hero-card">
+              <h3 class="ds-subheadline-sm">Your alternate support plan</h3>
+              <div class="stack">
+                <div class="task-card"><h4 class="ds-subheadline-xs">Metabolic health visit</h4><p class="ds-body-supportive muted">Talk through goals with a clinician.</p></div>
+                <div class="task-card"><h4 class="ds-subheadline-xs">Nutrition support</h4><p class="ds-body-supportive muted">Build a practical plan.</p></div>
+                <div class="task-card"><h4 class="ds-subheadline-xs">Follow-up criteria</h4><p class="ds-body-supportive muted">Know when to recheck fit.</p></div>
+              </div>
+              <span class="primary-action ds-interactive-small">Book support</span>
+            </section>
+          `,
+          adjacent: `
+            <section class="message clinical">
+              <span class="chip brand ds-overline">GLP-1 milestone</span>
+              <p class="ds-body-small">How are appetite, sleep, and energy feeling this month?</p>
+            </section>
+            <section class="message member">
+              <p class="ds-body-small">Weight is moving, but sleep is worse and I keep getting hot flashes.</p>
+            </section>
+            <section class="message clinical">
+              <p class="ds-body-small">That may be worth a Hormone Care review. Your care team can check fit first.</p>
+              <span class="primary-action ds-interactive-small">Ask care team</span>
+            </section>
+            <section class="card">
+              <p class="ds-overline muted">Coordinated care</p>
+              <p class="ds-body-small muted">The adjacent program appears only after a symptom signal inside the current plan.</p>
+            </section>
+          `,
+        };
+
+        return screens[id] || screens.compass;
+      }
+
+      render();
+    </script>
+  </body>
+</html>
