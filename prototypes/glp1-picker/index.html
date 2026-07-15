@@ -10,10 +10,10 @@
 <style>
   :root {
     --bg:#F3F1EB; --surface:#FFFFFF; --green:#0F4D3F; --green-dark:#0B3E33;
-    --ink:#1A1D1A; --mute:#6E7268; --strike:#A2A69C;
+    --ink:#1A1D1A; --mute:#6E7268; --strike:#7FA391;
     --seg-bg:#E8E5DE; --seg-line:#DED9CF;
-    --card-line:rgba(20,22,18,0.09); --line-soft:rgba(20,22,18,0.07);
-    --btn-soft:#ECE9E2;
+    --card-line:#E5E1D6; --line-soft:rgba(20,22,18,0.08);
+    --btn-soft:#F0EEE8;
     --serif:"Fraunces",Georgia,serif; --sans:"Inter",system-ui,sans-serif;
   }
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -45,7 +45,7 @@
   .scroll::-webkit-scrollbar{display:none;}
   .pad{padding:0 24px;}
 
-  h1.headline{font-family:var(--serif);font-size:30px;line-height:1.1;font-weight:400;letter-spacing:-0.01em;margin:22px 0 8px;color:var(--ink);}
+  h1.headline{font-family:var(--serif);font-size:25px;line-height:1.15;font-weight:400;letter-spacing:-0.01em;margin:22px 0 8px;color:var(--ink);white-space:nowrap;}
   p.sub{font-size:15px;line-height:1.5;color:var(--mute);margin-bottom:20px;}
 
   /* segmented controls */
@@ -59,55 +59,47 @@
   .seg button.on{background:var(--surface);color:var(--ink);font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,0.10),0 1px 1px rgba(0,0,0,0.04);}
   .seg.two button.on{color:var(--green);}
 
-  /* card rail */
-  .rail{display:flex;gap:14px;overflow-x:auto;padding:2px 24px 8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;}
+  /* card rail — cards size to their content; rail scrolls x, page scrolls y */
+  .rail{display:flex;gap:14px;overflow-x:auto;padding:2px 24px 8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;align-items:stretch;}
   .rail::-webkit-scrollbar{display:none;}
   .med-card{
     min-width:280px;width:280px;scroll-snap-align:start;background:var(--surface);
-    border:1.5px solid var(--card-line);border-radius:22px;padding:14px;display:flex;flex-direction:column;
+    border:1.5px solid var(--card-line);border-radius:18px;padding:12px 12px 14px;
+    display:flex;flex-direction:column;height:auto;
     transition:border-color .18s ease,box-shadow .18s ease;
   }
   .med-card.selected{border-color:var(--green);box-shadow:0 0 0 1px var(--green);}
-  .med-card.hidden{display:none;}
 
-  .media{position:relative;border-radius:14px;overflow:hidden;height:150px;
-    background:
-      radial-gradient(120% 80% at 78% 8%, #A9C4A0 0%, #C7D8BE 26%, rgba(199,216,190,0) 55%),
-      linear-gradient(180deg,#EDE7DC 0%,#E6DCCB 60%,#DDCFB8 100%);
-  }
-  .media .chip{position:absolute;top:10px;left:10px;background:var(--surface);border:1px solid var(--card-line);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:500;color:var(--ink);z-index:2;}
-  .media .pen{position:absolute;left:12%;right:20%;bottom:26px;height:26px;border-radius:20px;
-    background:linear-gradient(180deg,#FBFAF8 0%,#E7E4DD 100%);box-shadow:0 3px 8px rgba(0,0,0,0.18);transform:rotate(-3deg);}
-  .media .pen::after{content:"";position:absolute;right:-2px;top:3px;width:22px;height:20px;border-radius:6px;background:#6E5FA6;box-shadow:inset 0 -4px 0 rgba(0,0,0,0.12);}
-  .media .box{position:absolute;right:14px;bottom:22px;width:52px;height:64px;border-radius:5px;background:#F7F5F0;border:1px solid #DFD8CC;box-shadow:0 3px 8px rgba(0,0,0,0.12);}
-  .media .box::before{content:"";position:absolute;top:8px;left:8px;right:8px;height:8px;border-radius:2px;background:#1F7A57;}
-  .media .box::after{content:"";position:absolute;top:22px;left:8px;right:8px;bottom:8px;border:1px solid #E4B94A;border-radius:2px;}
+  .media{position:relative;border-radius:12px;overflow:hidden;height:150px;flex-shrink:0;background:#F1EDE3;}
+  .media svg{display:block;width:100%;height:100%;}
+  .media .chip{position:absolute;top:10px;left:10px;background:var(--surface);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:400;color:var(--ink);z-index:2;box-shadow:0 1px 2px rgba(0,0,0,0.06);}
 
-  .med-body{padding:0 6px;}
-  .med-name{font-family:var(--serif);font-size:23px;font-weight:400;text-align:center;margin-top:16px;color:var(--ink);}
-  .med-generic{font-size:14px;color:var(--mute);text-align:center;margin-top:2px;}
+  /* body grows with content; CTA pinned to the bottom so equal-height cards align */
+  .med-body{padding:0 8px;display:flex;flex-direction:column;flex:1;}
+  .med-name{font-size:20px;font-weight:400;text-align:center;margin-top:16px;color:var(--ink);letter-spacing:-0.01em;}
+  .med-generic{font-size:12px;color:var(--mute);text-align:center;margin-top:3px;}
 
   /* overview price */
-  .price-block{text-align:center;margin:16px 0 14px;}
-  .price-main{font-size:19px;color:var(--ink);}
-  .price-main .from{font-family:var(--serif);font-style:italic;font-weight:400;}
-  .price-sub{font-size:13px;color:var(--mute);margin-top:3px;}
+  .price-block{text-align:center;margin:14px 0 16px;}
+  .price-main{font-family:var(--serif);font-size:18px;color:var(--ink);}
+  .price-main .from{font-style:italic;}
+  .price-sub{font-size:12px;color:var(--mute);margin-top:4px;font-family:var(--sans);}
 
   /* 3-month table */
-  .price-table{margin:14px 0 12px;}
-  .price-row{display:flex;justify-content:space-between;align-items:center;padding:13px 4px;border-top:1px solid var(--line-soft);font-size:14px;}
-  .price-row:first-child{border-top:none;}
+  .price-table{margin:14px 0 14px;}
+  .price-row{display:flex;justify-content:space-between;align-items:center;padding:13px 2px;border-bottom:1px solid var(--line-soft);font-size:14px;}
+  .price-row:last-child{border-bottom:none;}
   .price-row .m{color:var(--ink);}
-  .price-row .v{color:var(--ink);font-weight:400;}
-  .price-row .v .old{color:var(--strike);text-decoration:line-through;margin-right:6px;}
+  .price-row .v{color:var(--ink);}
+  .price-row .v .old{color:var(--strike);text-decoration:line-through;margin-right:8px;}
 
-  .med-cta{width:100%;border:none;border-radius:999px;padding:14px;font-family:var(--sans);font-size:15px;font-weight:500;cursor:pointer;margin-top:6px;transition:all .18s ease;}
+  .med-cta{width:100%;border:none;border-radius:10px;padding:13px;font-family:var(--sans);font-size:14px;font-weight:500;cursor:pointer;margin-top:auto;transition:all .18s ease;}
   .med-cta.soft{background:var(--btn-soft);color:var(--ink);}
-  .med-cta.soft:hover{background:#E4E0D8;}
+  .med-cta.soft:hover{background:#E6E3DB;}
   .med-cta.done{background:var(--green);color:#fff;}
 
   .footer{padding:16px 24px 28px;background:var(--bg);flex-shrink:0;}
-  .foot-btn{width:100%;border-radius:999px;padding:16px;font-family:var(--sans);font-size:16px;font-weight:500;cursor:pointer;transition:all .18s ease;text-align:center;}
+  .foot-btn{width:100%;border-radius:12px;padding:16px;font-family:var(--sans);font-size:15px;font-weight:500;cursor:pointer;transition:all .18s ease;text-align:center;}
   .foot-btn.ghost{background:transparent;border:1.5px solid var(--green);color:var(--green);}
   .foot-btn.ghost:hover{background:rgba(15,77,63,0.05);}
   .foot-btn.filled{background:var(--green);border:1.5px solid var(--green);color:#fff;}
@@ -165,25 +157,101 @@
 
 <script>
   const MEDS = [
-    { id:"zep-pen", name:"Zepbound KwikPen", generic:"Tirzepatide", form:"Weekly injection", type:"injection",
+    { id:"zep-pen", name:"Zepbound KwikPen", generic:"Tirzepatide", form:"Weekly injection", type:"injection", art:"pen", accent:"#6E5FA6",
       priceFrom:"$149/mo", insurance:"or $25/mo with insurance",
       months:[["Month 1","$200","$149"],["Month 2","$200","$149"],["Month 3","","From $249"]] },
-    { id:"zep-vial", name:"Zepbound vial", generic:"Tirzepatide", form:"Weekly injection", type:"injection",
+    { id:"zep-vial", name:"Zepbound vial", generic:"Tirzepatide", form:"Weekly injection", type:"injection", art:"vial", accent:"#2E6B5A",
       priceFrom:"$149/mo", insurance:"or $25/mo with insurance",
       months:[["Month 1","$200","$149"],["Month 2","$200","$149"],["Month 3","","From $249"]] },
-    { id:"wegovy", name:"Wegovy", generic:"Semaglutide", form:"Weekly injection", type:"injection",
+    { id:"wegovy", name:"Wegovy", generic:"Semaglutide", form:"Weekly injection", type:"injection", art:"pen", accent:"#33587E",
       priceFrom:"$199/mo", insurance:"or $25/mo with insurance",
       months:[["Month 1","$260","$199"],["Month 2","$260","$199"],["Month 3","","From $299"]] },
-    { id:"rybelsus", name:"Rybelsus", generic:"Semaglutide", form:"Daily pill", type:"pill",
+    { id:"rybelsus", name:"Rybelsus", generic:"Semaglutide", form:"Daily pill", type:"pill", art:"bottle", accent:"#2F7E6F",
       priceFrom:"$99/mo", insurance:"or $15/mo with insurance",
       months:[["Month 1","$140","$99"],["Month 2","$140","$99"],["Month 3","","From $169"]] },
   ];
 
   let state = { type:"all", view:"overview", selected:null };
 
-  function mediaSVG() {
-    return '<div class="chip">FORM</div><div class="pen"></div><div class="box"></div>';
+  /* -------- media illustrations (tiled wall + counter + greenery + product) -------- */
+
+  function backdrop(uid) {
+    // subway-tile wall, warm counter, herb sprig — echoes the photography in the source design
+    let tiles = "";
+    for (let y = 24; y <= 72; y += 24) tiles += `<line x1="0" y1="${y}" x2="280" y2="${y}"/>`;
+    for (let r = 0; r < 4; r++) {
+      const off = r % 2 ? 0 : 35;
+      for (let x = off; x <= 280; x += 70) tiles += `<line x1="${x}" y1="${r*24}" x2="${x}" y2="${r*24+24}"/>`;
+    }
+    return `
+      <defs>
+        <linearGradient id="wall${uid}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#F4F0E7"/><stop offset="1" stop-color="#EDE7D9"/>
+        </linearGradient>
+        <linearGradient id="body${uid}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#FCFBF8"/><stop offset="1" stop-color="#E9E5DC"/>
+        </linearGradient>
+      </defs>
+      <rect width="280" height="150" fill="url(#wall${uid})"/>
+      <g stroke="#E3DDCE" stroke-width="1.2">${tiles}</g>
+      <rect y="96" width="280" height="54" fill="#EAE2D0"/>
+      <line x1="0" y1="96" x2="280" y2="96" stroke="#DCD2BC" stroke-width="1.5"/>
+      <g>
+        <path d="M242 96 q4 -26 24 -34 q4 22 -18 32z" fill="#7FA37B"/>
+        <path d="M252 96 q14 -18 32 -16 q-4 20 -28 18z" fill="#587F58"/>
+        <path d="M236 96 q-2 -18 10 -28 q8 14 -4 27z" fill="#93B489"/>
+        <rect x="230" y="88" width="44" height="8" rx="2" fill="#C9BFA6"/>
+      </g>`;
   }
+
+  function productArt(m, uid) {
+    if (m.art === "pen") {
+      // injection pen lying on the counter, colored cap = brand accent
+      return `
+        <ellipse cx="128" cy="126" rx="88" ry="6" fill="rgba(40,35,20,0.12)"/>
+        <g transform="rotate(-3 128 112)">
+          <rect x="40" y="101" width="152" height="22" rx="11" fill="url(#body${uid})" stroke="#DAD5C9" stroke-width="1"/>
+          <rect x="66" y="102" width="72" height="20" fill="#FBFAF6"/>
+          <rect x="72" y="108" width="44" height="5" rx="2.5" fill="${m.accent}"/>
+          <rect x="72" y="115" width="28" height="3" rx="1.5" fill="#BEB9AC"/>
+          <rect x="148" y="105" width="15" height="14" rx="3" fill="#FFFFFF" stroke="#D8D3C7"/>
+          <rect x="186" y="98" width="28" height="28" rx="8" fill="${m.accent}"/>
+          <rect x="190" y="102" width="6" height="20" rx="3" fill="rgba(255,255,255,0.28)"/>
+        </g>`;
+    }
+    if (m.art === "vial") {
+      // carton + glass vial
+      return `
+        <ellipse cx="118" cy="122" rx="34" ry="5" fill="rgba(40,35,20,0.12)"/>
+        <ellipse cx="172" cy="122" rx="20" ry="4" fill="rgba(40,35,20,0.10)"/>
+        <rect x="94" y="54" width="48" height="66" rx="3" fill="#F8F5ED" stroke="#DFD8C6" stroke-width="1"/>
+        <rect x="101" y="62" width="34" height="9" rx="2" fill="${m.accent}"/>
+        <rect x="101" y="76" width="22" height="4" rx="2" fill="#BEB9AC"/>
+        <rect x="101" y="84" width="34" height="26" rx="2" fill="none" stroke="#E2C766" stroke-width="1.5"/>
+        <rect x="158" y="82" width="28" height="38" rx="4" fill="#EFF3EF" stroke="#D3DBD2" stroke-width="1"/>
+        <rect x="163" y="74" width="18" height="10" rx="2" fill="${m.accent}"/>
+        <rect x="160" y="94" width="24" height="16" rx="2" fill="#FBFAF6"/>
+        <rect x="163" y="99" width="14" height="3" rx="1.5" fill="${m.accent}"/>`;
+    }
+    // bottle + tablets
+    return `
+      <ellipse cx="132" cy="122" rx="34" ry="5" fill="rgba(40,35,20,0.12)"/>
+      <rect x="110" y="60" width="44" height="58" rx="8" fill="#F8F6F1" stroke="#DFD8C6" stroke-width="1"/>
+      <rect x="116" y="48" width="32" height="16" rx="4" fill="${m.accent}"/>
+      <rect x="115" y="74" width="34" height="30" rx="3" fill="#FFFFFF" stroke="#E7E1D3"/>
+      <rect x="120" y="80" width="24" height="5" rx="2.5" fill="${m.accent}"/>
+      <rect x="120" y="89" width="16" height="3" rx="1.5" fill="#BEB9AC"/>
+      <ellipse cx="176" cy="118" rx="11" ry="6" fill="#F4F1E9" stroke="#D9D2C2"/>
+      <ellipse cx="192" cy="122" rx="11" ry="6" fill="#F4F1E9" stroke="#D9D2C2"/>`;
+  }
+
+  function mediaSVG(m) {
+    const uid = m.id.replace(/[^a-z0-9]/gi, "");
+    return `<svg viewBox="0 0 280 150" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${m.name}">
+      ${backdrop(uid)}${productArt(m, uid)}</svg>`;
+  }
+
+  /* -------- rendering -------- */
 
   function renderCards() {
     const rail = document.getElementById("rail");
@@ -206,8 +274,7 @@
       card.innerHTML = `
         <div class="media">
           <div class="chip">${m.form}</div>
-          <div class="pen"></div>
-          <div class="box"></div>
+          ${mediaSVG(m)}
         </div>
         <div class="med-body">
           <div class="med-name">${m.name}</div>
@@ -236,11 +303,15 @@
     }
   }
 
+  function syncSeg(segId, attr, value) {
+    document.querySelectorAll(`#${segId} button`).forEach(x =>
+      x.classList.toggle("on", x.dataset[attr] === value));
+  }
+
   document.getElementById("typeSeg").addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b) return;
     state.type = b.dataset.type;
-    document.querySelectorAll("#typeSeg button").forEach(x => x.classList.remove("on"));
-    b.classList.add("on");
+    syncSeg("typeSeg", "type", state.type);
     // keep selection only if still visible
     if (state.selected) {
       const sel = MEDS.find(x => x.id === state.selected);
@@ -251,10 +322,17 @@
   document.getElementById("viewSeg").addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b) return;
     state.view = b.dataset.view;
-    document.querySelectorAll("#viewSeg button").forEach(x => x.classList.remove("on"));
-    b.classList.add("on");
+    syncSeg("viewSeg", "view", state.view);
     renderCards();
   });
+
+  // QA hooks: ?view=pricing&type=pill&selected=zep-pen preselect a state for screenshots
+  const qp = new URLSearchParams(location.search);
+  if (["overview","pricing"].includes(qp.get("view"))) state.view = qp.get("view");
+  if (["all","pill","injection"].includes(qp.get("type"))) state.type = qp.get("type");
+  if (MEDS.some(m => m.id === qp.get("selected"))) state.selected = qp.get("selected");
+  syncSeg("typeSeg", "type", state.type);
+  syncSeg("viewSeg", "view", state.view);
 
   renderCards();
   renderFooter();
